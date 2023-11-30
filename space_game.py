@@ -296,7 +296,7 @@ while run:
 	
 	# pauses the game
 	if paused:
-		draw_text('Move using W, A, S, D. Near a station buy fuel - F sell cargo - H, shoot - SPACEBAR', font, WHITE, 0, 20)
+		draw_text('Move using arrow keys. When near a station you can: buy fuel - F sell cargo - H, shoot - SPACEBAR', font, WHITE, 0, 20)
 		draw_text('Press ESC to enter this menu and pause game', font, WHITE, 0, 50)
 
 	else:
@@ -324,16 +324,16 @@ while run:
 					paused = False
 
 			#ship movement
-			if event.key == pygame.K_w:
+			if event.key == pygame.K_UP:
 				moving_up = True
 				
-			if event.key == pygame.K_s:
+			if event.key == pygame.K_DOWN:
 				moving_down = True				
 
-			if event.key == pygame.K_a:
+			if event.key == pygame.K_LEFT:
 				moving_left = True
 	
-			if event.key == pygame.K_d:
+			if event.key == pygame.K_RIGHT:
 				moving_right = True
 				
 			if event.key == pygame.K_SPACE:
@@ -348,16 +348,16 @@ while run:
 				
 		if event.type == pygame.KEYUP:
 			#ship movement
-			if event.key == pygame.K_w:
+			if event.key == pygame.K_UP:
 				moving_up = False
 
-			if event.key == pygame.K_s:
+			if event.key == pygame.K_DOWN:
 				moving_down = False				
 
-			if event.key == pygame.K_a:
+			if event.key == pygame.K_LEFT:
 				moving_left = False
 
-			if event.key == pygame.K_d:
+			if event.key == pygame.K_RIGHT:
 				moving_right = False
 				
 			if event.key == pygame.K_SPACE:
