@@ -1,8 +1,8 @@
 import pygame
-import random
+import random, json
 
-#TODO pridat ziskavanie penazi (napr tazenie meteoritov), mozno viacej stanic, urobit moznosti podla mena (trade, mining) a skusit pridat lepsie ovladanie obchodu, mozno cez button alebo mys 
-
+#TODO maybe more stations 
+#TODO ADD LOAD, AND FORMAT STORAGE AND MONEY, BECAUSE IT DOES NOT ROUND DOWN!!!!!
 pygame.init()
 
 SCREEN_WIDTH = 1080
@@ -50,9 +50,24 @@ selling = False
 paused = True #zmenit na true, ked to bude hotove
 shooting = False
 
+#Saving/loading function
+def saving():
+	save_data = {
+		'credits': Player.credits,
+		'storage': Player.storage,
+		'fuel': Player.fuel,
+	}
+
+	with open("save.json", "w") as file:
+		json.dump(save_data, file)
+
+	print("GAME SAVED")
+
+
 def draw_text(text, font, text_col, x, y):
 	img = font.render(text, True, text_col)
 	screen.blit(img, (x, y))
+
 
 def draw_bg():
 	screen.fill(YELLOW)
@@ -269,7 +284,7 @@ class Asteroid(pygame.sprite.Sprite):
 			Player.storage += 1.2 * round(random.uniform(0.6, 3), 2)
 			self.kill()
 			
-		if len(asteroid_group) < 3: #TODO upravit aby to dalo viacej asteroidov
+		if len(asteroid_group) < 3: #TODO ADD MORE ASTEROIDS
 			asteroid = Asteroid()
 			asteroid_group.add(asteroid)
 		
@@ -297,7 +312,7 @@ while run:
 	# pauses the game
 	if paused:
 		draw_text('Move using arrow keys. When near a station you can: buy fuel - F sell cargo - H, shoot - SPACEBAR', font, WHITE, 0, 20)
-		draw_text('Press ESC to enter this menu and pause game', font, WHITE, 0, 50)
+		draw_text('Press ESC to enter this menu and pause game, press S to save', font, WHITE, 0, 50)
 
 	else:
 
@@ -344,7 +359,9 @@ while run:
 				
 			if event.key == pygame.K_h:
 				selling = True
-				
+			
+			if event.key == pygame.K_s:
+				saving()
 				
 		if event.type == pygame.KEYUP:
 			#ship movement
