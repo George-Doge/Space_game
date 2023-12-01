@@ -2,7 +2,7 @@
 
 Welcome to my Space Miner game. The basic game loop is working, but additional functions are not implemented.
 >[!IMPORTANT]
->If you are running 'space_game.py' you need to have 'pygame' library installed! 
+>If you are running `space_game.py` you need to have `pygame` library installed! 
 
 ## VERSION 0.1.1
 - [x] MINING & SELLING
