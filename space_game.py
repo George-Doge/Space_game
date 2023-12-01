@@ -1,8 +1,8 @@
 import pygame
-import random
+import random, json
 
-#TODO pridat ziskavanie penazi (napr tazenie meteoritov), mozno viacej stanic, urobit moznosti podla mena (trade, mining) a skusit pridat lepsie ovladanie obchodu, mozno cez button alebo mys 
-
+#TODO maybe more stations 
+#TODO ADD LOAD, AND FORMAT STORAGE AND MONEY, BECAUSE IT DOES NOT ROUND DOWN!!!!!
 pygame.init()
 
 SCREEN_WIDTH = 1080
@@ -50,9 +50,36 @@ selling = False
 paused = True #zmenit na true, ked to bude hotove
 shooting = False
 
+#Saving/loading function
+def saving():
+	save_data = {
+		'credits': Player.credits,
+		'storage': Player.storage,
+		'fuel': Player.fuel,
+	}
+
+	with open("save.json", "w") as file:
+		json.dump(save_data, file)
+
+	print("GAME SAVED")
+
+def loading():
+	try:
+		with open("save.json", "r") as file:
+			save_data = json.load(file)
+			Player.credits = save_data.get('credits')
+			Player.storage = save_data.get('storage')
+			Player.fuel = save_data.get('fuel')
+
+		print("GAME LOADED")
+
+	except FileNotFoundError:
+		print("SAVE NOT FOUND")
+
 def draw_text(text, font, text_col, x, y):
 	img = font.render(text, True, text_col)
 	screen.blit(img, (x, y))
+
 
 def draw_bg():
 	screen.fill(YELLOW)
@@ -269,7 +296,7 @@ class Asteroid(pygame.sprite.Sprite):
 			Player.storage += 1.2 * round(random.uniform(0.6, 3), 2)
 			self.kill()
 			
-		if len(asteroid_group) < 3: #TODO upravit aby to dalo viacej asteroidov
+		if len(asteroid_group) < 3: #TODO ADD MORE ASTEROIDS
 			asteroid = Asteroid()
 			asteroid_group.add(asteroid)
 		
@@ -296,8 +323,8 @@ while run:
 	
 	# pauses the game
 	if paused:
-		draw_text('Move using W, A, S, D. Near a station buy fuel - F sell cargo - H, shoot - SPACEBAR', font, WHITE, 0, 20)
-		draw_text('Press ESC to enter this menu and pause game', font, WHITE, 0, 50)
+		draw_text('Move using arrow keys. When near a station you can: buy fuel - F sell cargo - H, shoot - SPACEBAR', font, WHITE, 0, 20)
+		draw_text('Press ESC to enter this menu and pause game, press S to save and L to load.', font, WHITE, 0, 50)
 
 	else:
 
@@ -324,16 +351,16 @@ while run:
 					paused = False
 
 			#ship movement
-			if event.key == pygame.K_w:
+			if event.key == pygame.K_UP:
 				moving_up = True
 				
-			if event.key == pygame.K_s:
+			if event.key == pygame.K_DOWN:
 				moving_down = True				
 
-			if event.key == pygame.K_a:
+			if event.key == pygame.K_LEFT:
 				moving_left = True
 	
-			if event.key == pygame.K_d:
+			if event.key == pygame.K_RIGHT:
 				moving_right = True
 				
 			if event.key == pygame.K_SPACE:
@@ -344,20 +371,26 @@ while run:
 				
 			if event.key == pygame.K_h:
 				selling = True
+			
+			if event.key == pygame.K_s:
+				saving()
 				
-				
+			if event.key == pygame.K_l:
+				loading()
+
+
 		if event.type == pygame.KEYUP:
 			#ship movement
-			if event.key == pygame.K_w:
+			if event.key == pygame.K_UP:
 				moving_up = False
 
-			if event.key == pygame.K_s:
+			if event.key == pygame.K_DOWN:
 				moving_down = False				
 
-			if event.key == pygame.K_a:
+			if event.key == pygame.K_LEFT:
 				moving_left = False
 
-			if event.key == pygame.K_d:
+			if event.key == pygame.K_RIGHT:
 				moving_right = False
 				
 			if event.key == pygame.K_SPACE:
