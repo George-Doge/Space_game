@@ -63,6 +63,18 @@ def saving():
 
 	print("GAME SAVED")
 
+def loading():
+	try:
+		with open("save.json", "r") as file:
+			save_data = json.load(file)
+			Player.credits = save_data.get('credits')
+			Player.storage = save_data.get('storage')
+			Player.fuel = save_data.get('fuel')
+
+		print("GAME LOADED")
+
+	except FileNotFoundError:
+		print("SAVE NOT FOUND")
 
 def draw_text(text, font, text_col, x, y):
 	img = font.render(text, True, text_col)
@@ -312,7 +324,7 @@ while run:
 	# pauses the game
 	if paused:
 		draw_text('Move using arrow keys. When near a station you can: buy fuel - F sell cargo - H, shoot - SPACEBAR', font, WHITE, 0, 20)
-		draw_text('Press ESC to enter this menu and pause game, press S to save', font, WHITE, 0, 50)
+		draw_text('Press ESC to enter this menu and pause game, press S to save and L to load.', font, WHITE, 0, 50)
 
 	else:
 
@@ -363,6 +375,10 @@ while run:
 			if event.key == pygame.K_s:
 				saving()
 				
+			if event.key == pygame.K_l:
+				loading()
+
+
 		if event.type == pygame.KEYUP:
 			#ship movement
 			if event.key == pygame.K_UP:
