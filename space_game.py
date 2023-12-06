@@ -2,7 +2,6 @@ import pygame
 import random, json
 
 #TODO maybe more stations 
-#TODO ADD LOAD, AND FORMAT STORAGE AND MONEY, BECAUSE IT DOES NOT ROUND DOWN!!!!!
 pygame.init()
 
 SCREEN_WIDTH = 1080
@@ -102,7 +101,7 @@ class Ship(pygame.sprite.Sprite):
 		# credits
 		self.credits = 10
 		# storage
-		self.storage_max = 7
+		self.storage_max = 15 #adjust to change maximum storage
 		self.storage = 0
 		#shooting
 		self.cooldown = 30
@@ -145,7 +144,7 @@ class Ship(pygame.sprite.Sprite):
 				
 		# handle fuel burning (so that it won't burn 2 units if pressing W and S for example)			
 		if fueld <= -1:
-			self.fuel -= 1 * 0.4
+			self.fuel -= 1 * 0.3 # change the parameter to adjust fuel burning speed
 
 			
 	def action(self):
@@ -299,7 +298,7 @@ class Asteroid(pygame.sprite.Sprite):
 			Player.storage += 1.2 * round(random.uniform(0.6, 3), 2)
 			self.kill()
 			
-		if len(asteroid_group) < 3: #TODO ADD MORE ASTEROID TYPES
+		if len(asteroid_group) < 6: #TODO ADD MORE ASTEROID TYPES
 			asteroid = Asteroid()
 			asteroid_group.add(asteroid)
 		
