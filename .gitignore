@@ -161,4 +161,5 @@ cython_debug/
 
 #IGNORE SAVE FILE AND BUILD EXE
 /space_game
+/space_game.exe
 /save.json
