@@ -116,6 +116,7 @@ class Ship(pygame.sprite.Sprite):
 	def moving(self):
 		
 		fueld = 0
+		self.fuel = round(self.fuel, 2)
 		
 		if self.fuel > 0:
 		
@@ -165,13 +166,15 @@ class Ship(pygame.sprite.Sprite):
 		pygame.draw.rect(screen, GREEN, self.fuel_stor)
 		
 		# inventory and money
-		draw_text(f'{round(self.credits, 2)} credits', font, WHITE, 280, 620)
+		self.credits = round(self.credits, 2)
+		draw_text(f'{self.credits} credits', font, WHITE, 280, 620)
 		
 		if self.credits <= 0:
 			self.credits = 0
 			
 		# cargo
-		draw_text(f'Cargo: {round(self.storage, 2)} t ', font, WHITE, 500, 620)
+		self.storage = round(self.storage, 2)
+		draw_text(f'Cargo: {self.storage} t ', font, WHITE, 500, 620)
 		
 		if self.storage >= self.storage_max * 0.75 and not self.storage == self.storage_max:
 			draw_text(f'Reaching maximum capacity', font, RED, 500, 650)
@@ -296,7 +299,7 @@ class Asteroid(pygame.sprite.Sprite):
 			Player.storage += 1.2 * round(random.uniform(0.6, 3), 2)
 			self.kill()
 			
-		if len(asteroid_group) < 3: #TODO ADD MORE ASTEROIDS
+		if len(asteroid_group) < 3: #TODO ADD MORE ASTEROID TYPES
 			asteroid = Asteroid()
 			asteroid_group.add(asteroid)
 		
