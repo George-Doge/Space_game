@@ -1,15 +1,14 @@
 import pygame
 import random, json
 
-#TODO maybe more stations 
-#TODO ADD LOAD, AND FORMAT STORAGE AND MONEY, BECAUSE IT DOES NOT ROUND DOWN!!!!!
+#TODO maybe more stations, MORE ASTEROID TYPES 
 pygame.init()
 
 SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Playtest-space game")
+pygame.display.set_caption("Space game v0.1.1")
 
 # load pictures
 bg_img = pygame.image.load('images/space.png').convert_alpha()
@@ -47,7 +46,7 @@ moving_left = False
 moving_right = False
 fuel_buying = False
 selling = False
-paused = True #zmenit na true, ked to bude hotove
+paused = True
 shooting = False
 
 #Saving/loading function
@@ -102,7 +101,7 @@ class Ship(pygame.sprite.Sprite):
 		# credits
 		self.credits = 10
 		# storage
-		self.storage_max = 7
+		self.storage_max = 15 #adjust to change maximum storage
 		self.storage = 0
 		#shooting
 		self.cooldown = 30
@@ -116,6 +115,7 @@ class Ship(pygame.sprite.Sprite):
 	def moving(self):
 		
 		fueld = 0
+		self.fuel = round(self.fuel, 2)
 		
 		if self.fuel > 0:
 		
@@ -144,7 +144,7 @@ class Ship(pygame.sprite.Sprite):
 				
 		# handle fuel burning (so that it won't burn 2 units if pressing W and S for example)			
 		if fueld <= -1:
-			self.fuel -= 1 * 0.4
+			self.fuel -= 1 * 0.3 # change the parameter to adjust fuel burning speed
 
 			
 	def action(self):
@@ -165,13 +165,15 @@ class Ship(pygame.sprite.Sprite):
 		pygame.draw.rect(screen, GREEN, self.fuel_stor)
 		
 		# inventory and money
-		draw_text(f'{round(self.credits, 2)} credits', font, WHITE, 280, 620)
+		self.credits = round(self.credits, 2)
+		draw_text(f'{self.credits} credits', font, WHITE, 280, 620)
 		
 		if self.credits <= 0:
 			self.credits = 0
 			
 		# cargo
-		draw_text(f'Cargo: {round(self.storage, 2)} t ', font, WHITE, 500, 620)
+		self.storage = round(self.storage, 2)
+		draw_text(f'Cargo: {self.storage} t ', font, WHITE, 500, 620)
 		
 		if self.storage >= self.storage_max * 0.75 and not self.storage == self.storage_max:
 			draw_text(f'Reaching maximum capacity', font, RED, 500, 650)
@@ -296,7 +298,7 @@ class Asteroid(pygame.sprite.Sprite):
 			Player.storage += 1.2 * round(random.uniform(0.6, 3), 2)
 			self.kill()
 			
-		if len(asteroid_group) < 3: #TODO ADD MORE ASTEROIDS
+		if len(asteroid_group) < 6: #HERE YOU CAN CHANGE NUMBER OF ASTEROIDS
 			asteroid = Asteroid()
 			asteroid_group.add(asteroid)
 		
@@ -365,13 +367,13 @@ while run:
 				
 			if event.key == pygame.K_SPACE:
 				shooting = True
-			#selling and buying
+			#station interaction
 			if event.key == pygame.K_f:
 				fuel_buying = True
 				
 			if event.key == pygame.K_h:
 				selling = True
-			
+			#saving and loading
 			if event.key == pygame.K_s:
 				saving()
 				
@@ -395,7 +397,7 @@ while run:
 				
 			if event.key == pygame.K_SPACE:
 				shooting = False
-				
+			#station interaction
 			if event.key == pygame.K_f:
 				fuel_buying = False
 
