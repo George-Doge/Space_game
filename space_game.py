@@ -1,14 +1,15 @@
 import pygame
 import random, json
 
-#TODO maybe more stations, MORE ASTEROID TYPES 
+#TODO maybe more stations, MORE ASTEROID TYPES, MAKE PAUSE MENU BETTER
+#TODO add some animations, so it doesn't look static
 pygame.init()
 
 SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.1.1")
+pygame.display.set_caption("Space game v0.2")
 
 # load pictures
 bg_img = pygame.image.load('images/space.png').convert_alpha()
@@ -19,10 +20,13 @@ ship_img = pygame.transform.scale(ship_img, (60, 75))
 ship_img = pygame.transform.rotate(ship_img, 270)
 
 station_img = pygame.image.load('images/station.png').convert_alpha()
-station_img = pygame.transform.scale(station_img, (80, 80))
+station_img = pygame.transform.scale(station_img, (100, 100))
 
 asteroid_img = pygame.image.load('images/asteroid.png').convert_alpha()
 asteroid_img = pygame.transform.scale(asteroid_img, (60, 60))
+
+asteroid2_img = pygame.image.load('images/asteroid-2.png').convert_alpha()
+asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
 
 laser_img = pygame.image.load('images/laser.png').convert_alpha()
 
@@ -73,7 +77,7 @@ def loading():
 		print("GAME LOADED")
 
 	except FileNotFoundError:
-		print("SAVE NOT FOUND")
+		print("!!!SAVE NOT FOUND!!!")
 
 def draw_text(text, font, text_col, x, y):
 	img = font.render(text, True, text_col)
@@ -219,7 +223,7 @@ class Laser(pygame.sprite.Sprite):
 		#check for collision with asteroid
 		for asteroid in asteroid_group:
 			if pygame.sprite.spritecollide(asteroid, laser_group, False):
-				asteroid.health -= 10
+				asteroid.health -= 15 #set damage
 				self.kill()
 
 
@@ -280,28 +284,67 @@ class Station(pygame.sprite.Sprite):
 
 
 class Asteroid(pygame.sprite.Sprite):
-	def __init__(self):
+	def __init__(self, type):
 		pygame.sprite.Sprite.__init__(self)
-		self.image = asteroid_img
+		self.type = type
+		#determines what type of asteroid it should show and gives it properties
+		if type == "common":
+			self.image = asteroid_img
+			self.health = 30
+
+		elif type == "rare":
+			self.image = asteroid2_img
+			self.health = 40
+		# in case of error shows basic asteroid
+		else:
+			self.image = asteroid_img
+			self.type = "common"
+
 		self.rect = self.image.get_rect()
 		# select random spawnpoint
 		self.randomx = random.randint(500, SCREEN_WIDTH - 60)
 		self.randomy = random.randint(60, SCREEN_HEIGHT - 300)
 		self.rect.center = (self.randomx, self.randomy)
-		self.health = 30
-		
-		
+
+
+	def determine_type(self):
+		choice = random.randint(1, 10)
+
+		if choice > 7:
+			type = "rare"
+			return type
+
+		else:
+			type = "common"
+			return type
+
+
 	def update(self):
 		self.draw()
-		
+		spawn_new = False
+		max_number_of_asteroids = 6 #HERE change to modify max number of asteroids
+
 		if self.health <= 0:
-			Player.storage += 1.2 * round(random.uniform(0.6, 3), 2)
-			self.kill()
-			
-		if len(asteroid_group) < 6: #HERE YOU CAN CHANGE NUMBER OF ASTEROIDS
-			asteroid = Asteroid()
-			asteroid_group.add(asteroid)
+
+			if self.type == "common": #add mined storage in case of a common asteroid
+				Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
+				self.kill()
+
+			elif self.type == "rare": #add in case of a rare asteroid
+				Player.storage += 1.5 * round(random.uniform(1, 3), 2)
+				self.kill()
+
+		if len(asteroid_group) <= 4: #HERE you can change number of asteroids that need to be mined so new can be spawned
+			spawn_new = True
 		
+		if spawn_new:
+			for i in range(1, max_number_of_asteroids):
+				type = self.determine_type()
+				asteroid = Asteroid(type)
+				asteroid_group.add(asteroid)
+
+			spawn_new = False
+
 	def draw(self):
 		screen.blit(self.image, self.rect)
 
@@ -311,7 +354,7 @@ Player = Ship(500, 200, 10)
 station = Station('Fuel & Trade', 200, 400)
 #asteroid things
 asteroid_group = pygame.sprite.Group()
-asteroid = Asteroid()
+asteroid = Asteroid("common")
 asteroid_group.add(asteroid)
 #laser things
 laser_group = pygame.sprite.Group()

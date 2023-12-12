@@ -4,8 +4,8 @@ Welcome to my Space Miner game. The basic game loop is working, but additional f
 >[!IMPORTANT]
 >If you are running `space_game.py` you need to have `pygame` library installed! 
 
-## VERSION 0.1.1
+## VERSION 0.2
 - [x] MINING & SELLING
 - [x] SAVE & LOAD
-- [ ] MORE ASTEROID TYPES
+- [X] MORE ASTEROID TYPES
 - [ ] MORE THINGS??
