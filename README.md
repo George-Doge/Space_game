@@ -7,5 +7,5 @@ Welcome to my Space Miner game. The basic game loop is working, but additional f
 ## VERSION 0.1.1
 - [x] MINING & SELLING
 - [x] SAVE & LOAD
-- [ ] MORE ASTEROID TYPES
+- [X] MORE ASTEROID TYPES
 - [ ] MORE THINGS??
