@@ -9,7 +9,7 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.1.1")
+pygame.display.set_caption("Space game v0.2")
 
 # load pictures
 bg_img = pygame.image.load('images/space.png').convert_alpha()
