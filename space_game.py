@@ -2,7 +2,7 @@ import pygame
 import random, json
 
 #TODO maybe more stations, MORE ASTEROID TYPES, MAKE PAUSE MENU BETTER
-#TODO add some animations, so it doesn't look static
+#TODO add some animations, so it doesn't look static; bigger map?? I don't know
 pygame.init()
 
 SCREEN_WIDTH = 1080
@@ -323,6 +323,7 @@ class Asteroid(pygame.sprite.Sprite):
 		self.draw()
 		spawn_new = False
 		max_number_of_asteroids = 6 #HERE change to modify max number of asteroids
+		number_of_asteroids = len(asteroid_group)
 
 		if self.health <= 0:
 
@@ -334,11 +335,11 @@ class Asteroid(pygame.sprite.Sprite):
 				Player.storage += 1.5 * round(random.uniform(1, 3), 2)
 				self.kill()
 
-		if len(asteroid_group) <= 4: #HERE you can change number of asteroids that need to be mined so new can be spawned
+		if number_of_asteroids < 4: #HERE you can change number of asteroids that need to be mined so new can be spawned
 			spawn_new = True
 		
 		if spawn_new:
-			for i in range(1, max_number_of_asteroids):
+			for i in range(number_of_asteroids, max_number_of_asteroids):
 				type = self.determine_type()
 				asteroid = Asteroid(type)
 				asteroid_group.add(asteroid)
