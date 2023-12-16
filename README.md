@@ -3,6 +3,7 @@
 Welcome to my Space Miner game. Right now you can mine two types of asteroids (common, and rare) and sell them.
 Their rate of dropping 'cargo' is randomized every time they are mined. Station prices are randomized every time you start the code.
 Minigame also supports the save and load system. I may add something in the future.
+List of sprite authors coming soon!
 
 ---
 >[!IMPORTANT]
