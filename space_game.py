@@ -9,7 +9,7 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.2")
+pygame.display.set_caption("Space game v0.2.1")
 
 # load pictures
 bg_img = pygame.image.load('images/space.png').convert_alpha()
@@ -29,6 +29,9 @@ asteroid2_img = pygame.image.load('images/asteroid-2.png').convert_alpha()
 asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
 
 laser_img = pygame.image.load('images/laser.png').convert_alpha()
+
+buy_img = pygame.image.load('images/buy.png').convert_alpha()
+sell_img = pygame.image.load('images/sell.png').convert_alpha()
 
 # set framerate
 clock = pygame.time.Clock()
@@ -349,6 +352,36 @@ class Asteroid(pygame.sprite.Sprite):
 	def draw(self):
 		screen.blit(self.image, self.rect)
 
+#button class
+class Button():
+	def __init__(self, x, y, image, scale):
+		width = image.get_width()
+		height = image.get_height()
+		self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
+		self.rect = self.image.get_rect()
+		self.rect.center = (x, y)
+		self.clicked = False
+
+	def draw(self, surface):
+		action = False
+
+		#get mouse position
+		pos = pygame.mouse.get_pos()
+
+		#check mouseover and clicked conditions
+		if self.rect.collidepoint(pos):
+			if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+				action = True
+				self.clicked = True
+
+		if pygame.mouse.get_pressed()[0] == 0:
+			self.clicked = False
+
+		#draw button
+		surface.blit(self.image, (self.rect.x, self.rect.y))
+
+		return action
+
 
 # declare instances
 Player = Ship(500, 200, 10)
@@ -360,6 +393,10 @@ asteroid_group.add(asteroid)
 #laser things
 laser_group = pygame.sprite.Group()
 
+#buttons
+buyButton = Button(105, 750, buy_img, 3)
+sellButton = Button(550, 750, sell_img, 3)
+
 run = True
 
 while run:
@@ -369,13 +406,16 @@ while run:
 	
 	# pauses the game
 	if paused:
-		draw_text('Move using arrow keys. When near a station you can: buy fuel - F sell cargo - H, shoot - SPACEBAR', font, WHITE, 0, 20)
-		draw_text('Press ESC to enter this menu and pause game, press S to save and L to load.', font, WHITE, 0, 50)
+		draw_text('Arrow keys - movement, SPACEBAR - shoot', font, WHITE, 150, 20)
+		draw_text('ESC - pause, S - save, L - load', font, WHITE, 150, 50)
 
 	else:
 
 		# updates instances of player and stations and more
-		
+
+		fuel_buying = buyButton.draw(screen)
+		selling = sellButton.draw(screen)
+
 		station.update()
 	
 		Player.update()
@@ -412,11 +452,12 @@ while run:
 			if event.key == pygame.K_SPACE:
 				shooting = True
 			#station interaction
-			if event.key == pygame.K_f:
-				fuel_buying = True
+			# if event.key == pygame.K_f:
+			# 	fuel_buying = True
 				
-			if event.key == pygame.K_h:
-				selling = True
+			# if event.key == pygame.K_h:
+			# 	selling = True
+				
 			#saving and loading
 			if event.key == pygame.K_s:
 				saving()
@@ -441,12 +482,13 @@ while run:
 				
 			if event.key == pygame.K_SPACE:
 				shooting = False
-			#station interaction
-			if event.key == pygame.K_f:
-				fuel_buying = False
 
-			if event.key == pygame.K_h:
-				selling = False
+			#station interaction
+			# if event.key == pygame.K_f:
+			# 	fuel_buying = False
+
+			# if event.key == pygame.K_h:
+			# 	selling = False
 				
 	pygame.display.update()
 
