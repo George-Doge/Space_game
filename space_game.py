@@ -15,23 +15,23 @@ pygame.display.set_caption("Space game v0.2.1")
 bg_img = pygame.image.load('images/space.png').convert_alpha()
 bg_img = pygame.transform.scale(bg_img, (SCREEN_WIDTH, SCREEN_HEIGHT - 270))
 
-ship_img = pygame.image.load('images/ship.png').convert_alpha()
+ship_img = pygame.image.load('images/sprites/ship.png').convert_alpha()
 ship_img = pygame.transform.scale(ship_img, (60, 75))
 ship_img = pygame.transform.rotate(ship_img, 270)
 
-station_img = pygame.image.load('images/station.png').convert_alpha()
+station_img = pygame.image.load('images/sprites/station.png').convert_alpha()
 station_img = pygame.transform.scale(station_img, (100, 100))
 
-asteroid_img = pygame.image.load('images/asteroid.png').convert_alpha()
+asteroid_img = pygame.image.load('images/sprites/asteroid.png').convert_alpha()
 asteroid_img = pygame.transform.scale(asteroid_img, (60, 60))
 
-asteroid2_img = pygame.image.load('images/asteroid-2.png').convert_alpha()
+asteroid2_img = pygame.image.load('images/sprites/asteroid-2.png').convert_alpha()
 asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
 
 laser_img = pygame.image.load('images/laser.png').convert_alpha()
 
-buy_img = pygame.image.load('images/buy.png').convert_alpha()
-sell_img = pygame.image.load('images/sell.png').convert_alpha()
+buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
+sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
 
 # set framerate
 clock = pygame.time.Clock()
@@ -55,6 +55,7 @@ fuel_buying = False
 selling = False
 paused = True
 shooting = False
+bg_offset = 0
 
 #Saving/loading function
 def saving():
@@ -87,9 +88,13 @@ def draw_text(text, font, text_col, x, y):
 	screen.blit(img, (x, y))
 
 
-def draw_bg():
+def draw_bg(x):
 	screen.fill(YELLOW)
-	screen.blit(bg_img, (0, 0))
+	if not paused: #for now there will be just one image printed 3 times which will be moving. I don't know how long they will last 
+		screen.blit(bg_img, (x, 0))
+		screen.blit(bg_img, (x + SCREEN_WIDTH, 0))
+		screen.blit(bg_img, (x + 2*SCREEN_WIDTH, 0))
+
 
 
 class Ship(pygame.sprite.Sprite):
@@ -402,7 +407,12 @@ run = True
 while run:
 
 	clock.tick(FPS)
-	draw_bg()
+
+	# moves bg a little bit and updates it
+
+	if not paused:
+		bg_offset -= 0.35 #here you can change the value to make it slower/faster. I found values around 0.35 to be fine
+	draw_bg(bg_offset)
 	
 	# pauses the game
 	if paused:
@@ -451,12 +461,6 @@ while run:
 				
 			if event.key == pygame.K_SPACE:
 				shooting = True
-			#station interaction
-			# if event.key == pygame.K_f:
-			# 	fuel_buying = True
-				
-			# if event.key == pygame.K_h:
-			# 	selling = True
 				
 			#saving and loading
 			if event.key == pygame.K_s:
@@ -482,13 +486,6 @@ while run:
 				
 			if event.key == pygame.K_SPACE:
 				shooting = False
-
-			#station interaction
-			# if event.key == pygame.K_f:
-			# 	fuel_buying = False
-
-			# if event.key == pygame.K_h:
-			# 	selling = False
 				
 	pygame.display.update()
 
