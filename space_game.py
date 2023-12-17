@@ -1,34 +1,37 @@
 import pygame
 import random, json
 
-#TODO maybe more stations, MORE ASTEROID TYPES, MAKE PAUSE MENU BETTER
-#TODO add some animations, so it doesn't look static; bigger map?? I don't know
+#TODO maybe more stations, !MAKE PAUSE MENU BETTER!
+#TODO add some animations, so it doesn't look static; bigger/more maps?? I don't know
 pygame.init()
 
 SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.2")
+pygame.display.set_caption("Space game v0.2.2")
 
 # load pictures
 bg_img = pygame.image.load('images/space.png').convert_alpha()
 bg_img = pygame.transform.scale(bg_img, (SCREEN_WIDTH, SCREEN_HEIGHT - 270))
 
-ship_img = pygame.image.load('images/ship.png').convert_alpha()
+ship_img = pygame.image.load('images/sprites/ship.png').convert_alpha()
 ship_img = pygame.transform.scale(ship_img, (60, 75))
 ship_img = pygame.transform.rotate(ship_img, 270)
 
-station_img = pygame.image.load('images/station.png').convert_alpha()
+station_img = pygame.image.load('images/sprites/station.png').convert_alpha()
 station_img = pygame.transform.scale(station_img, (100, 100))
 
-asteroid_img = pygame.image.load('images/asteroid.png').convert_alpha()
+asteroid_img = pygame.image.load('images/sprites/asteroid.png').convert_alpha()
 asteroid_img = pygame.transform.scale(asteroid_img, (60, 60))
 
-asteroid2_img = pygame.image.load('images/asteroid-2.png').convert_alpha()
+asteroid2_img = pygame.image.load('images/sprites/asteroid-2.png').convert_alpha()
 asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
 
 laser_img = pygame.image.load('images/laser.png').convert_alpha()
+
+buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
+sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
 
 # set framerate
 clock = pygame.time.Clock()
@@ -40,6 +43,8 @@ WHITE = (255, 255, 255)
 ORANGE = (255, 165, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+DARK_BLUE = (0, 48, 78)
+DARK_BLUE_2 = (0, 3, 66)
 font = pygame.font.SysFont('Futura', 30)
 font2 = pygame.font.SysFont('Futura', 80)
 
@@ -52,6 +57,7 @@ fuel_buying = False
 selling = False
 paused = True
 shooting = False
+bg_offset = 0
 
 #Saving/loading function
 def saving():
@@ -84,9 +90,21 @@ def draw_text(text, font, text_col, x, y):
 	screen.blit(img, (x, y))
 
 
-def draw_bg():
-	screen.fill(YELLOW)
-	screen.blit(bg_img, (0, 0))
+def draw_bg(x):
+	screen.fill(DARK_BLUE)
+	if not paused: #for now there will be just one image printed 3 times which will be moving. I don't know how long they will last
+		for i in range(2): 
+			screen.blit(bg_img, (x + SCREEN_WIDTH * i, 0))
+
+
+def pause_menu():
+	screen.fill(DARK_BLUE_2)
+	draw_text('SPACE GAME', font2, WHITE, 150, 20)
+	draw_text('CONTROLS', font, WHITE, 150, 80)
+	draw_text('Arrow keys - movement, SPACEBAR - shoot', font, WHITE, 150, 110)
+	draw_text('ESC - pause, S - save, L - load', font, WHITE, 150, 140)
+	screen.blit(ship_img, (50, 80))
+	#TODO maybe print out part of README.md here for info
 
 
 class Ship(pygame.sprite.Sprite):
@@ -349,6 +367,36 @@ class Asteroid(pygame.sprite.Sprite):
 	def draw(self):
 		screen.blit(self.image, self.rect)
 
+#button class
+class Button():
+	def __init__(self, x, y, image, scale):
+		width = image.get_width()
+		height = image.get_height()
+		self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
+		self.rect = self.image.get_rect()
+		self.rect.center = (x, y)
+		self.clicked = False
+
+	def draw(self, surface):
+		action = False
+
+		#get mouse position
+		pos = pygame.mouse.get_pos()
+
+		#check mouseover and clicked conditions
+		if self.rect.collidepoint(pos):
+			if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+				action = True
+				self.clicked = True
+
+		if pygame.mouse.get_pressed()[0] == 0:
+			self.clicked = False
+
+		#draw button
+		surface.blit(self.image, (self.rect.x, self.rect.y))
+
+		return action
+
 
 # declare instances
 Player = Ship(500, 200, 10)
@@ -360,22 +408,37 @@ asteroid_group.add(asteroid)
 #laser things
 laser_group = pygame.sprite.Group()
 
+#buttons
+buyButton = Button(105, 760, buy_img, 3)
+sellButton = Button(550, 760, sell_img, 3)
+
 run = True
 
 while run:
 
 	clock.tick(FPS)
-	draw_bg()
+
+	# moves bg a little bit and updates it
+
+	if not paused:
+		bg_offset -= 0.35 #here you can change the value to make it slower/faster. I found values around 0.35 to be fine
+
+	if bg_offset < -SCREEN_WIDTH: #reset bg_offset so it loops forever
+		bg_offset = 0
+
+	draw_bg(bg_offset)
 	
 	# pauses the game
 	if paused:
-		draw_text('Move using arrow keys. When near a station you can: buy fuel - F sell cargo - H, shoot - SPACEBAR', font, WHITE, 0, 20)
-		draw_text('Press ESC to enter this menu and pause game, press S to save and L to load.', font, WHITE, 0, 50)
+		pause_menu()
 
 	else:
 
 		# updates instances of player and stations and more
-		
+
+		fuel_buying = buyButton.draw(screen)
+		selling = sellButton.draw(screen)
+
 		station.update()
 	
 		Player.update()
@@ -411,12 +474,7 @@ while run:
 				
 			if event.key == pygame.K_SPACE:
 				shooting = True
-			#station interaction
-			if event.key == pygame.K_f:
-				fuel_buying = True
 				
-			if event.key == pygame.K_h:
-				selling = True
 			#saving and loading
 			if event.key == pygame.K_s:
 				saving()
@@ -441,12 +499,6 @@ while run:
 				
 			if event.key == pygame.K_SPACE:
 				shooting = False
-			#station interaction
-			if event.key == pygame.K_f:
-				fuel_buying = False
-
-			if event.key == pygame.K_h:
-				selling = False
 				
 	pygame.display.update()
 
