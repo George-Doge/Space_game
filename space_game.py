@@ -1,15 +1,15 @@
 import pygame
 import random, json
 
-#TODO maybe more stations, MORE ASTEROID TYPES, MAKE PAUSE MENU BETTER
-#TODO add some animations, so it doesn't look static; bigger map?? I don't know
+#TODO maybe more stations, !MAKE PAUSE MENU BETTER!
+#TODO add some animations, so it doesn't look static; bigger/more maps?? I don't know
 pygame.init()
 
 SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.2.1")
+pygame.display.set_caption("Space game v0.2.2")
 
 # load pictures
 bg_img = pygame.image.load('images/space.png').convert_alpha()
@@ -43,6 +43,8 @@ WHITE = (255, 255, 255)
 ORANGE = (255, 165, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
+DARK_BLUE = (0, 48, 78)
+DARK_BLUE_2 = (0, 3, 66)
 font = pygame.font.SysFont('Futura', 30)
 font2 = pygame.font.SysFont('Futura', 80)
 
@@ -89,12 +91,20 @@ def draw_text(text, font, text_col, x, y):
 
 
 def draw_bg(x):
-	screen.fill(YELLOW)
-	if not paused: #for now there will be just one image printed 3 times which will be moving. I don't know how long they will last 
-		screen.blit(bg_img, (x, 0))
-		screen.blit(bg_img, (x + SCREEN_WIDTH, 0))
-		screen.blit(bg_img, (x + 2*SCREEN_WIDTH, 0))
+	screen.fill(DARK_BLUE)
+	if not paused: #for now there will be just one image printed 3 times which will be moving. I don't know how long they will last
+		for i in range(2): 
+			screen.blit(bg_img, (x + SCREEN_WIDTH * i, 0))
 
+
+def pause_menu():
+	screen.fill(DARK_BLUE_2)
+	draw_text('SPACE GAME', font2, WHITE, 150, 20)
+	draw_text('CONTROLS', font, WHITE, 150, 80)
+	draw_text('Arrow keys - movement, SPACEBAR - shoot', font, WHITE, 150, 110)
+	draw_text('ESC - pause, S - save, L - load', font, WHITE, 150, 140)
+	screen.blit(ship_img, (50, 80))
+	#TODO maybe print out part of README.md here for info
 
 
 class Ship(pygame.sprite.Sprite):
@@ -399,8 +409,8 @@ asteroid_group.add(asteroid)
 laser_group = pygame.sprite.Group()
 
 #buttons
-buyButton = Button(105, 750, buy_img, 3)
-sellButton = Button(550, 750, sell_img, 3)
+buyButton = Button(105, 760, buy_img, 3)
+sellButton = Button(550, 760, sell_img, 3)
 
 run = True
 
@@ -412,12 +422,15 @@ while run:
 
 	if not paused:
 		bg_offset -= 0.35 #here you can change the value to make it slower/faster. I found values around 0.35 to be fine
+
+	if bg_offset < -SCREEN_WIDTH: #reset bg_offset so it loops forever
+		bg_offset = 0
+
 	draw_bg(bg_offset)
 	
 	# pauses the game
 	if paused:
-		draw_text('Arrow keys - movement, SPACEBAR - shoot', font, WHITE, 150, 20)
-		draw_text('ESC - pause, S - save, L - load', font, WHITE, 150, 50)
+		pause_menu()
 
 	else:
 
