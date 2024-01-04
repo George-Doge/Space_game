@@ -9,11 +9,14 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.2.2")
+pygame.display.set_caption("Space game v0.2.3")
 
 # load pictures
-bg_img = pygame.image.load('images/space.png').convert_alpha()
+bg_img = pygame.image.load('images/background/space.png').convert_alpha()
 bg_img = pygame.transform.scale(bg_img, (SCREEN_WIDTH, SCREEN_HEIGHT - 270))
+
+bg_main_img = pygame.image.load('images/background/asteroid_belt.jpg')
+bg_main_img = pygame.transform.scale(bg_main_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
 ship_img = pygame.image.load('images/sprites/ship.png').convert_alpha()
 ship_img = pygame.transform.scale(ship_img, (60, 75))
@@ -30,8 +33,11 @@ asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
 
 laser_img = pygame.image.load('images/laser.png').convert_alpha()
 
+#button images
 buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
 sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
+
+play_button_img = pygame.image.load('images/buttons/PlayButton.png').convert_alpha()
 
 # set framerate
 clock = pygame.time.Clock()
@@ -58,6 +64,7 @@ selling = False
 paused = True
 shooting = False
 bg_offset = 0
+first_run = True
 
 #Saving/loading function
 def saving():
@@ -92,9 +99,19 @@ def draw_text(text, font, text_col, x, y):
 
 def draw_bg(x):
 	screen.fill(DARK_BLUE)
-	if not paused: #for now there will be just one image printed 3 times which will be moving. I don't know how long they will last
+	if not paused: #for now there will be just one image printed 3 times which will be moving. Then it will reset
 		for i in range(2): 
 			screen.blit(bg_img, (x + SCREEN_WIDTH * i, 0))
+
+
+def main_menu():
+	screen.blit(bg_main_img, (0, 0))
+	draw_text('SPACE GAME', font2, WHITE, SCREEN_WIDTH//2 - 200, 20)
+	playButton = Button(540, 300, play_button_img, 0.35)
+
+	started = playButton.draw(screen)
+
+	return not started
 
 
 def pause_menu():
@@ -104,7 +121,6 @@ def pause_menu():
 	draw_text('Arrow keys - movement, SPACEBAR - shoot', font, WHITE, 150, 110)
 	draw_text('ESC - pause, S - save, L - load', font, WHITE, 150, 140)
 	screen.blit(ship_img, (50, 80))
-	#TODO maybe print out part of README.md here for info
 
 
 class Ship(pygame.sprite.Sprite):
@@ -418,34 +434,39 @@ while run:
 
 	clock.tick(FPS)
 
-	# moves bg a little bit and updates it
-
-	if not paused:
-		bg_offset -= 0.35 #here you can change the value to make it slower/faster. I found values around 0.35 to be fine
-
-	if bg_offset < -SCREEN_WIDTH: #reset bg_offset so it loops forever
-		bg_offset = 0
-
-	draw_bg(bg_offset)
-	
-	# pauses the game
-	if paused:
-		pause_menu()
-
+	#show main menu once when started
+	if first_run:
+		first_run = main_menu()
 	else:
 
-		# updates instances of player and stations and more
+		# moves bg a little bit and updates it
 
-		fuel_buying = buyButton.draw(screen)
-		selling = sellButton.draw(screen)
+		if not paused:
+			bg_offset -= 0.35 #here you can change the value to make it slower/faster. I found values around 0.35 to be fine
 
-		station.update()
-	
-		Player.update()
-		asteroid_group.update()
-		asteroid_group.draw(screen)
-		laser_group.update()
-		laser_group.draw(screen)
+		if bg_offset < -SCREEN_WIDTH: #reset bg_offset so it loops forever
+			bg_offset = 0
+
+		draw_bg(bg_offset)
+		
+		# pauses the game
+		if paused:
+			pause_menu()
+
+		else:
+
+			# updates instances of player and stations and more
+
+			fuel_buying = buyButton.draw(screen)
+			selling = sellButton.draw(screen)
+
+			station.update()
+		
+			Player.update()
+			asteroid_group.update()
+			asteroid_group.draw(screen)
+			laser_group.update()
+			laser_group.draw(screen)
 	
 
 	for event in pygame.event.get():
