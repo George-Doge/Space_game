@@ -31,13 +31,14 @@ asteroid_img = pygame.transform.scale(asteroid_img, (60, 60))
 asteroid2_img = pygame.image.load('images/sprites/asteroid-2.png').convert_alpha()
 asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
 
-laser_img = pygame.image.load('images/laser.png').convert_alpha()
+laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
 
 #button images
 buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
 sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
 
 play_button_img = pygame.image.load('images/buttons/PlayButton.png').convert_alpha()
+quit_button_img = pygame.image.load('images/buttons/QuitButton.png').convert_alpha()
 
 # set framerate
 clock = pygame.time.Clock()
@@ -108,9 +109,11 @@ def main_menu():
 	screen.blit(bg_main_img, (0, 0))
 	draw_text('SPACE GAME', font2, WHITE, SCREEN_WIDTH//2 - 200, 20)
 	playButton = Button(540, 300, play_button_img, 0.35)
+	#quitButton = Button(540, 600, quit_button_img, 0.35)
 
 	started = playButton.draw(screen)
-
+	#quit = quitButton.draw(screen)
+	#TODO do this using states (e.g. 0, 1, 2, 3... for exit, start etc.)
 	return not started
 
 
