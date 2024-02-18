@@ -17,7 +17,7 @@ Check [CREDITS.md](CREDITS.md) for sources. Code in development branch is newer 
 - [x] MINING & SELLING
 - [x] SAVE & LOAD
 - [X] MORE ASTEROID TYPES
-- [ ] UPDATED START/PAUSE MENU
+- [X] UPDATED START/PAUSE MENU
 - [ ] CLEAN UP THE CODE
 - [ ] ADDITIONAL THINGS??
 
