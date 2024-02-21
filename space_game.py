@@ -1,5 +1,6 @@
 import pygame
 import random, json
+from menu import main_menu
 
 #TODO maybe more stations, !MAKE PAUSE MENU BETTER!
 #TODO add some animations, so it doesn't look static; bigger/more maps?? I don't know
@@ -9,10 +10,10 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.2.2")
+pygame.display.set_caption("Space game v0.2.3")
 
 # load pictures
-bg_img = pygame.image.load('images/space.png').convert_alpha()
+bg_img = pygame.image.load('images/background/space.png').convert_alpha()
 bg_img = pygame.transform.scale(bg_img, (SCREEN_WIDTH, SCREEN_HEIGHT - 270))
 
 ship_img = pygame.image.load('images/sprites/ship.png').convert_alpha()
@@ -28,10 +29,12 @@ asteroid_img = pygame.transform.scale(asteroid_img, (60, 60))
 asteroid2_img = pygame.image.load('images/sprites/asteroid-2.png').convert_alpha()
 asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
 
-laser_img = pygame.image.load('images/laser.png').convert_alpha()
+laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
 
+#button images
 buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
 sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
+
 
 # set framerate
 clock = pygame.time.Clock()
@@ -55,9 +58,9 @@ moving_left = False
 moving_right = False
 fuel_buying = False
 selling = False
-paused = True
 shooting = False
 bg_offset = 0
+first_run = True
 
 #Saving/loading function
 def saving():
@@ -92,19 +95,9 @@ def draw_text(text, font, text_col, x, y):
 
 def draw_bg(x):
 	screen.fill(DARK_BLUE)
-	if not paused: #for now there will be just one image printed 3 times which will be moving. I don't know how long they will last
+	if main_menu_instance.state == 1: #for now there will be just one image printed 3 times which will be moving. Then it will reset
 		for i in range(2): 
 			screen.blit(bg_img, (x + SCREEN_WIDTH * i, 0))
-
-
-def pause_menu():
-	screen.fill(DARK_BLUE_2)
-	draw_text('SPACE GAME', font2, WHITE, 150, 20)
-	draw_text('CONTROLS', font, WHITE, 150, 80)
-	draw_text('Arrow keys - movement, SPACEBAR - shoot', font, WHITE, 150, 110)
-	draw_text('ESC - pause, S - save, L - load', font, WHITE, 150, 140)
-	screen.blit(ship_img, (50, 80))
-	#TODO maybe print out part of README.md here for info
 
 
 class Ship(pygame.sprite.Sprite):
@@ -412,41 +405,42 @@ laser_group = pygame.sprite.Group()
 buyButton = Button(105, 760, buy_img, 3)
 sellButton = Button(550, 760, sell_img, 3)
 
+#main menu instance
+main_menu_instance = main_menu()
 run = True
 
 while run:
 
 	clock.tick(FPS)
 
-	# moves bg a little bit and updates it
+		# moves bg a little bit and updates it
 
-	if not paused:
+	if main_menu_instance.state == 1:
 		bg_offset -= 0.35 #here you can change the value to make it slower/faster. I found values around 0.35 to be fine
 
 	if bg_offset < -SCREEN_WIDTH: #reset bg_offset so it loops forever
 		bg_offset = 0
 
 	draw_bg(bg_offset)
-	
-	# pauses the game
-	if paused:
-		pause_menu()
-
-	else:
-
-		# updates instances of player and stations and more
-
+		
+	# updates instances of player and stations and more
+	if main_menu_instance.state == 1: #loads thing only when game is unpaused
 		fuel_buying = buyButton.draw(screen)
 		selling = sellButton.draw(screen)
 
 		station.update()
-	
+			
 		Player.update()
 		asteroid_group.update()
 		asteroid_group.draw(screen)
 		laser_group.update()
 		laser_group.draw(screen)
 	
+	if main_menu_instance.state != 1:
+		main_menu_instance.controller()
+
+	if main_menu_instance.state == 3: #quit button
+		run = False
 
 	for event in pygame.event.get():
 		if event.type == pygame.QUIT:
@@ -454,10 +448,7 @@ while run:
 
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
-				if not paused:
-					paused = True
-				else:
-					paused = False
+				main_menu_instance.state = 0
 
 			#ship movement
 			if event.key == pygame.K_UP:
@@ -476,10 +467,11 @@ while run:
 				shooting = True
 				
 			#saving and loading
-			if event.key == pygame.K_s:
+			if event.key == pygame.K_s and main_menu_instance.state == 1:
+				#check if the game is running, so player can't load/save when paused
 				saving()
 				
-			if event.key == pygame.K_l:
+			if event.key == pygame.K_l and main_menu_instance.state == 1:
 				loading()
 
 
