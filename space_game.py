@@ -2,7 +2,7 @@ import pygame
 import random, json
 from menu import main_menu
 
-#TODO maybe more stations, !MAKE PAUSE MENU BETTER!
+#TODO maybe more stations
 #TODO add some animations, so it doesn't look static; bigger/more maps?? I don't know
 pygame.init()
 
@@ -10,7 +10,7 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.2.3")
+pygame.display.set_caption("Space game v0.2.4")
 
 # load pictures
 bg_img = pygame.image.load('images/background/space.png').convert_alpha()
@@ -34,6 +34,7 @@ laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
 #button images
 buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
 sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
+buy_all_img = pygame.image.load('images/buttons/buy_all.png').convert_alpha()
 
 
 # set framerate
@@ -57,6 +58,7 @@ moving_down = False
 moving_left = False
 moving_right = False
 fuel_buying = False
+fuel_all_buying = False
 selling = False
 shooting = False
 bg_offset = 0
@@ -261,6 +263,11 @@ class Station(pygame.sprite.Sprite):
 		if fuel_buying and Player.credits > 0 and not Player.fuel >= Player.fuel_full:
 			Player.credits -= self.fuel_price
 			Player.fuel += 10
+
+		if fuel_all_buying:
+			while not Player.fuel >= Player.fuel_full and Player.credits > 0:
+				Player.credits -= self.fuel_price
+				Player.fuel += 10
 		
 	def trade_station(self):
 		draw_text(f'Sell mined asteroids for {self.asteroid_price} credits per t?', font, WHITE, self.rect.x -100, self.rect.y + 130)
@@ -403,6 +410,7 @@ laser_group = pygame.sprite.Group()
 
 #buttons
 buyButton = Button(105, 760, buy_img, 3)
+buyAllButton = Button(205, 760, buy_all_img, 3)
 sellButton = Button(550, 760, sell_img, 3)
 
 #main menu instance
@@ -426,6 +434,7 @@ while run:
 	# updates instances of player and stations and more
 	if main_menu_instance.state == 1: #loads thing only when game is unpaused
 		fuel_buying = buyButton.draw(screen)
+		fuel_all_buying = buyAllButton.draw(screen)
 		selling = sellButton.draw(screen)
 
 		station.update()
@@ -449,6 +458,7 @@ while run:
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
 				main_menu_instance.state = 0
+				main_menu_instance.clicked = False
 
 			#ship movement
 			if event.key == pygame.K_UP:
