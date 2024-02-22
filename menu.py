@@ -1,4 +1,5 @@
 import pygame
+from sys import exit 
 
 pygame.init()
 
@@ -9,14 +10,20 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space game menu")
 
 # load pictures
-bg_main_img = pygame.image.load('images/background/asteroid_belt.jpg')
-bg_main_img = pygame.transform.scale(bg_main_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
+try:
+	bg_main_img = pygame.image.load('images/background/asteroid_belt.jpg')
+	bg_main_img = pygame.transform.scale(bg_main_img, (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-play_button_img = pygame.image.load('images/buttons/PlayButton.png').convert_alpha()
-controls_button_img = pygame.image.load('images/buttons/ControlsButton.png').convert_alpha()
-quit_button_img = pygame.image.load('images/buttons/QuitButton.png').convert_alpha()
-credits_button_img = pygame.image.load('images/buttons/QuestionmarkSquareButton.png').convert_alpha()
-license_button_img = pygame.image.load('images/buttons/InfoSquareButton.png').convert_alpha()
+	play_button_img = pygame.image.load('images/buttons/PlayButton.png').convert_alpha()
+	controls_button_img = pygame.image.load('images/buttons/ControlsButton.png').convert_alpha()
+	quit_button_img = pygame.image.load('images/buttons/QuitButton.png').convert_alpha()
+	credits_button_img = pygame.image.load('images/buttons/QuestionmarkSquareButton.png').convert_alpha()
+	license_button_img = pygame.image.load('images/buttons/InfoSquareButton.png').convert_alpha()
+
+except FileNotFoundError as message:
+	print("An error occured while loading images in menu.py. One or more of them have not been found.\nDownload them again or check if they are in an images folder.")
+	print(f"Error message:\n{message}")
+	exit(1)
 
 # set framerate
 clock = pygame.time.Clock()
@@ -156,15 +163,26 @@ class main_menu():
 
 
 #get data from credits
-credits_file = open("CREDITS.md", "r")
-credits_text = credits_file.read().strip()
-credits_lines = credits_text.split("\n")
-credits_file.close()
+try:
+	credits_file = open("CREDITS.md", "r")
+	credits_text = credits_file.read().strip()
+	credits_lines = credits_text.split("\n")
+	credits_file.close()
 
-license_file = open("LICENSE.txt", "r")
-license_text = license_file.read().strip()
-license_lines = license_text.split("\n")
-license_file.close()
+except FileNotFoundError:
+	credits_text = "An error occured\nCREDITS.md was not found. Check if it is in the same folder as\nthe space_game.py and menu.py or if it is downloaded"
+	credits_lines = credits_text.split("\n")
+
+#get data from license
+try:
+	license_file = open("LICENSE.txt", "r")
+	license_text = license_file.read().strip()
+	license_lines = license_text.split("\n")
+	license_file.close()
+
+except FileNotFoundError:
+	license_text = "An error occured\nLICENSE.txt was not found. Check if it is in the same folder as\nthe space_game.py and menu.py or if it is downloaded"
+	license_lines = license_text.split("\n")
 
 '''
 run = True
