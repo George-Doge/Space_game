@@ -13,7 +13,7 @@ Check [CREDITS.md](CREDITS.md) for sources. Code in development branch is newer 
 >[!NOTE]
 >If you are running `space_game.py` you need to have `pygame` library installed.
 ---
-## VERSION 0.2.3
+## VERSION 0.2.4
 - [x] MINING & SELLING
 - [x] SAVE & LOAD
 - [X] MORE ASTEROID TYPES
