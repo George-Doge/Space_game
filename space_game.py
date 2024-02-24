@@ -6,6 +6,7 @@ import pygame
 from menu import main_menu
 
 # TODO: More stations
+# TODO: MAKE PAUSE MENU BETTER
 # TODO: add some animations, so it doesn't look static
 # TODO: bigger/more maps??
 
@@ -15,7 +16,7 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.2.4")
+pygame.display.set_caption("Space game v0.2.3")
 
 # load pictures
 background_img = pygame.image.load('images/background/space.png').convert_alpha()
@@ -47,7 +48,7 @@ laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
 
 # button images
 buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
-buy_all_img = pygame.image.load('images/buttons/buy_all.png').convert_alpha()
+max_img = pygame.image.load('images/buttons/max.png').convert_alpha()
 sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
 
 # set framerate
@@ -73,8 +74,11 @@ moving_right = False
 energy_buying = False
 energy_all_buying = False
 selling = False
+selling_all = False
 shooting = False
 background_offset = 0
+first_run = True
+
 
 # Saving/loading function
 def saving():
@@ -171,13 +175,13 @@ class Ship(pygame.sprite.Sprite):
                 self.state2_rect.y += self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_left and self.state2_rect.left >= -45:
+            if moving_left and self.state2_rect.left >= 10:
                 self.flip = True
                 self.direction = -1
                 self.state2_rect.x -= self.speed
                 energy_consumed -= 1
 
-            if moving_right and self.state2_rect.right <= SCREEN_WIDTH + 45:
+            if moving_right and self.state2_rect.right <= SCREEN_WIDTH - 10:
                 self.flip = False
                 self.direction = 1
                 self.state2_rect.x += self.speed
@@ -304,6 +308,10 @@ class Station(pygame.sprite.Sprite):
         if selling and Player.storage > 0:
             Player.storage -= 1
             Player.credits += self.asteroid_price
+        if selling_all and Player.storage > 0:
+            Player.credits += self.asteroid_price + Player.storage
+            Player.storage = 0
+
 
     # here, interaction and actions of station are handled
     def action(self):
@@ -435,9 +443,10 @@ asteroid_group = pygame.sprite.Group(asteroid)
 laser_group = pygame.sprite.Group()
 
 # buttons
-buyButton = Button(105, 760, buy_img, 3)
-buyAllButton = Button(205, 760, buy_all_img, 3)
-sellButton = Button(550, 760, sell_img, 3)
+buyButton = Button(105, 760, buy_img, 1)
+buyMaxButton = Button(225, 760, max_img, 1)
+sellButton = Button(550, 760, sell_img, 1)
+sellMaxButton = Button(670, 760, max_img, 1)
 
 # main menu instance
 main_menu_instance = main_menu()
@@ -461,8 +470,9 @@ while run:
     # updates instances of player and stations and more
     if main_menu_instance.state == 1:  # loads thing only when game is unpaused
         energy_buying = buyButton.draw(screen)
-        energy_all_buying = buyAllButton.draw(screen)
+        energy_all_buying = buyMaxButton.draw(screen)
         selling = sellButton.draw(screen)
+        selling_all = sellMaxButton.draw(screen)
 
         station.update()
 
@@ -485,7 +495,6 @@ while run:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 main_menu_instance.state = 0
-                main_menu_instance.clicked = False
 
             # ship movement
             if event.key == pygame.K_UP:
