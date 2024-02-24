@@ -6,7 +6,6 @@ import pygame
 from menu import main_menu
 
 # TODO: More stations
-# TODO: MAKE PAUSE MENU BETTER
 # TODO: add some animations, so it doesn't look static
 # TODO: bigger/more maps??
 
@@ -16,7 +15,7 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.2.3")
+pygame.display.set_caption("Space game v0.2.4")
 
 # load pictures
 background_img = pygame.image.load('images/background/space.png').convert_alpha()
@@ -77,7 +76,6 @@ selling = False
 selling_all = False
 shooting = False
 background_offset = 0
-first_run = True
 
 
 # Saving/loading function
@@ -495,6 +493,7 @@ while run:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 main_menu_instance.state = 0
+                main_menu_instance.clicked = False
 
             # ship movement
             if event.key == pygame.K_UP:
