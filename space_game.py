@@ -45,6 +45,8 @@ asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
 
 laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
 
+energy_bar_img = pygame.image.load('images/buttons/energy_bar.png').convert_alpha()
+
 # button images
 buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
 max_img = pygame.image.load('images/buttons/max.png').convert_alpha()
@@ -62,6 +64,8 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 DARK_BLUE = (0, 48, 78)
 DARK_BLUE_2 = (0, 3, 66)
+ENERGY_BLUE = (33, 150, 243)
+EMPTY_BLACK = (26, 24, 26)
 font_small = pygame.font.SysFont('Futura', 30)
 font_big = pygame.font.SysFont('Futura', 80)
 
@@ -205,9 +209,12 @@ class Ship(pygame.sprite.Sprite):
 
         # draw ENERGY gauge
         draw_text('ENERGY', font_small, WHITE, 70, 620)
-        self.energy_stor = pygame.Rect(70, 650, self.energy, 40)
-        pygame.draw.rect(screen, RED, self.energy_max)
-        pygame.draw.rect(screen, GREEN, self.energy_stor)
+        bar_length, bar_width = 48, 7
+        energy_stor = pygame.Rect(25 + bar_length, 660 + bar_width, int(94 * (self.energy / 100)), 36)
+
+        pygame.draw.rect(screen, EMPTY_BLACK, (25 + bar_length, 660 + bar_width, 94, 36))
+        pygame.draw.rect(screen, ENERGY_BLUE, energy_stor)
+        screen.blit(energy_bar_img, (25, 660))
 
         # inventory and money
         self.credits = round(self.credits, 2)
