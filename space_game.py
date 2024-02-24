@@ -1,5 +1,6 @@
 import json
 import random
+from sys import exit
 
 import pygame
 
@@ -15,40 +16,50 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Space game v0.2.4")
+pygame.display.set_caption("Space game v0.2.4.1")
 
-# load pictures
-background_img = pygame.image.load('images/background/space.png').convert_alpha()
-background_img = pygame.transform.scale(background_img, (SCREEN_WIDTH, SCREEN_HEIGHT - 270))
+try:
+    # load pictures
+    background_img = pygame.image.load('images/background/space.png').convert_alpha()
+    background_img = pygame.transform.scale(background_img, (SCREEN_WIDTH, SCREEN_HEIGHT - 270))
 
-ship_img = pygame.image.load('images/sprites/ship.png').convert_alpha()
-ship_img = pygame.transform.scale(ship_img, (60, 75))
-ship_img = pygame.transform.rotate(ship_img, 270)
+    # ship_img = pygame.image.load('images/sprites/ship.png').convert_alpha()
+    # ship_img = pygame.transform.scale(ship_img, (60, 75))
+    # ship_img = pygame.transform.rotate(ship_img, 270)
 
-ship0_img = pygame.image.load('images/sprites/ship-state0.png').convert_alpha()
-ship0_img = pygame.transform.rotate(ship0_img, 270)
+    ship0_img = pygame.image.load('images/sprites/ship/ship-state0.png').convert_alpha()
+    ship0_img = pygame.transform.rotate(ship0_img, 270)
 
-ship1_img = pygame.image.load('images/sprites/ship-state1.png').convert_alpha()
-ship1_img = pygame.transform.rotate(ship1_img, 270)
+    ship1_img = pygame.image.load('images/sprites/ship/ship-state1.png').convert_alpha()
+    ship1_img = pygame.transform.rotate(ship1_img, 270)
 
-ship2_img = pygame.image.load('images/sprites/ship-state2.png').convert_alpha()
-ship2_img = pygame.transform.rotate(ship2_img, 270)
+    ship2_img = pygame.image.load('images/sprites/ship/ship-state2.png').convert_alpha()
+    ship2_img = pygame.transform.rotate(ship2_img, 270)
 
-station_img = pygame.image.load('images/sprites/station.png').convert_alpha()
-station_img = pygame.transform.scale(station_img, (100, 100))
+    station_img = pygame.image.load('images/sprites/station.png').convert_alpha()
+    station_img = pygame.transform.scale(station_img, (100, 100))
 
-asteroid_img = pygame.image.load('images/sprites/asteroid.png').convert_alpha()
-asteroid_img = pygame.transform.scale(asteroid_img, (60, 60))
+    asteroid_img = pygame.image.load('images/sprites/asteroid/asteroid.png').convert_alpha()
+    asteroid_img = pygame.transform.scale(asteroid_img, (64, 64))
 
-asteroid2_img = pygame.image.load('images/sprites/asteroid-2.png').convert_alpha()
-asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
+    debris_common_img = pygame.image.load('images/sprites/asteroid/debris.png').convert_alpha()
 
-laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
+    asteroid2_img = pygame.image.load('images/sprites/asteroid/asteroid-2.png').convert_alpha()
+    asteroid2_img = pygame.transform.scale(asteroid2_img, (64, 64))
 
-# button images
-buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
-max_img = pygame.image.load('images/buttons/max.png').convert_alpha()
-sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
+    debris_rare_img = pygame.image.load('images/sprites/asteroid/debris_rare.png').convert_alpha()
+
+    laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
+
+    # button images
+    buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
+    max_img = pygame.image.load('images/buttons/max.png').convert_alpha()
+    sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
+
+except FileNotFoundError as message:
+	print("An error occured while loading images in space_game.py. One or more of them have not been found.\nDownload them again or check if they are in an images folder.")
+	print(f"Error message:\n{message}")
+	exit(1)
 
 # set framerate
 clock = pygame.time.Clock()
@@ -258,6 +269,7 @@ class Laser(pygame.sprite.Sprite):
         self.speed = 10
 
     def update(self):
+        self.draw()
         # move laser
         self.rect.x += (self.speed * self.direction)
 
@@ -269,6 +281,8 @@ class Laser(pygame.sprite.Sprite):
                 asteroid.health -= 15  # set damage
                 self.kill()
 
+    def draw(self):
+        screen.blit(self.image, self.rect)
 
 class Station(pygame.sprite.Sprite):
     def __init__(self, name, x, y):
@@ -377,11 +391,15 @@ class Asteroid(pygame.sprite.Sprite):
         if self.health <= 0:
 
             if self.type == "common":  # add mined storage in case of a common asteroid
-                Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
+                # Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
+                debris_instance = Debris(self.type, self.randomx, self.randomy)
+                debris_group.add(debris_instance)
                 self.kill()
 
             elif self.type == "rare":  # add in case of a rare asteroid
-                Player.storage += 1.5 * round(random.uniform(1, 3), 2)
+                # Player.storage += 1.5 * round(random.uniform(1, 3), 2)
+                debris_instance = Debris(self.type, self.randomx, self.randomy)
+                debris_group.add(debris_instance)
                 self.kill()
 
             # HERE you can change number of asteroids that need to be mined so new can be spawned
@@ -395,6 +413,37 @@ class Asteroid(pygame.sprite.Sprite):
                 asteroid_group.add(asteroid)
 
         # spawn_new = False
+
+    def draw(self):
+        screen.blit(self.image, self.rect)
+
+
+class Debris(pygame.sprite.Sprite):
+    def __init__(self, rarity, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.rarity = rarity
+        if self.rarity == "rare":
+            self.image = debris_rare_img
+
+        else:
+            self.image = debris_common_img
+
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+
+    def update(self):
+        self.draw()
+        # check if the debris is collected by the player
+        for debris in debris_group:
+            if self.rect.colliderect(Player.state2_rect) and not Player.storage <= Player.storage_max:
+                if self.rarity == "rare":
+                    self.kill()
+                    Player.storage += 1.5 * round(random.uniform(1, 3), 2)
+
+                elif self.rarity == "common":
+                    self.kill()
+                    Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
 
     def draw(self):
         screen.blit(self.image, self.rect)
@@ -437,6 +486,8 @@ station = Station('Energy & Trade', 200, 400)
 # asteroid things
 asteroid = Asteroid("common")
 asteroid_group = pygame.sprite.Group(asteroid)
+# debris things
+debris_group = pygame.sprite.Group()
 # laser things
 laser_group = pygame.sprite.Group()
 
@@ -472,13 +523,12 @@ while run:
         selling = sellButton.draw(screen)
         selling_all = sellMaxButton.draw(screen)
 
-        station.update()
-
         Player.update()
+
+        station.update()
         asteroid_group.update()
-        asteroid_group.draw(screen)
+        debris_group.update()
         laser_group.update()
-        laser_group.draw(screen)
 
     if main_menu_instance.state != 1:
         main_menu_instance.controller()
