@@ -39,15 +39,15 @@ try:
     station_img = pygame.image.load('images/sprites/station.png').convert_alpha()
     station_img = pygame.transform.scale(station_img, (100, 100))
 
-    asteroid_img = pygame.image.load('images/sprites/asteroid.png').convert_alpha()
+    asteroid_img = pygame.image.load('images/sprites/asteroid/asteroid.png').convert_alpha()
     asteroid_img = pygame.transform.scale(asteroid_img, (64, 64))
 
-    debris_common_img = pygame.image.load('images/sprites/debris.png').convert_alpha()
+    debris_common_img = pygame.image.load('images/sprites/asteroid/debris.png').convert_alpha()
 
-    asteroid2_img = pygame.image.load('images/sprites/asteroid-2.png').convert_alpha()
+    asteroid2_img = pygame.image.load('images/sprites/asteroid/asteroid-2.png').convert_alpha()
     asteroid2_img = pygame.transform.scale(asteroid2_img, (64, 64))
 
-    debris_rare_img = pygame.image.load('images/sprites/debris_rare.png').convert_alpha()
+    debris_rare_img = pygame.image.load('images/sprites/asteroid/debris_rare.png').convert_alpha()
 
     laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
 
@@ -57,7 +57,7 @@ try:
     sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
 
 except FileNotFoundError as message:
-	print("An error occured while loading images in menu.py. One or more of them have not been found.\nDownload them again or check if they are in an images folder.")
+	print("An error occured while loading images in space_game.py. One or more of them have not been found.\nDownload them again or check if they are in an images folder.")
 	print(f"Error message:\n{message}")
 	exit(1)
 
@@ -436,14 +436,14 @@ class Debris(pygame.sprite.Sprite):
         self.draw()
         # check if the debris is collected by the player
         for debris in debris_group:
-            if self.rect.colliderect(Player.state2_rect):
+            if self.rect.colliderect(Player.state2_rect) and not Player.storage <= Player.storage_max:
                 if self.rarity == "rare":
-                    Player.storage += 1.5 * round(random.uniform(1, 3), 2)
                     self.kill()
+                    Player.storage += 1.5 * round(random.uniform(1, 3), 2)
 
                 elif self.rarity == "common":
-                    Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
                     self.kill()
+                    Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
 
     def draw(self):
         screen.blit(self.image, self.rect)
