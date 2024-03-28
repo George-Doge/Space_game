@@ -57,9 +57,13 @@ try:
     sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
 
 except FileNotFoundError as message:
-	print("An error occured while loading images in space_game.py. One or more of them have not been found.\nDownload them again or check if they are in an images folder.")
-	print(f"Error message:\n{message}")
-	exit(1)
+    print("An error occured while loading images in space_game.py. One or more of them have not been found.\nDownload them again or check if they are in an images folder.")
+    print(f"Error message:\n{message}")
+
+    with open("errorLog.txt", "w") as file:
+        file.write(str(message))
+
+    exit(1)
 
 # set framerate
 clock = pygame.time.Clock()
@@ -436,7 +440,7 @@ class Debris(pygame.sprite.Sprite):
         self.draw()
         # check if the debris is collected by the player
         for debris in debris_group:
-            if self.rect.colliderect(Player.state2_rect) and not Player.storage <= Player.storage_max:
+            if self.rect.colliderect(Player.state2_rect) and Player.storage <= Player.storage_max:
                 if self.rarity == "rare":
                     self.kill()
                     Player.storage += 1.5 * round(random.uniform(1, 3), 2)
