@@ -5,7 +5,7 @@ pygame.init()
 
 SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
-# TODO find 'X' button
+
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space game menu")
 
@@ -24,6 +24,10 @@ try:
 except FileNotFoundError as message:
 	print("An error occured while loading images in menu.py. One or more of them have not been found.\nDownload them again or check if they are in an images folder.")
 	print(f"Error message:\n{message}")
+
+	with open("errorLog.txt", "w") as file:
+		file.write(str(message))
+
 	exit(1)
 
 # set framerate
@@ -41,7 +45,7 @@ def draw_text(text, font, text_col, x, y):
 	screen.blit(img, (x, y))
 
 
-#button class
+# button class
 class Button:
 	def __init__(self, x, y, image, scale):
 		width = image.get_width()
