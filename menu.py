@@ -5,7 +5,7 @@ pygame.init()
 
 SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
-#TODO find 'X' button
+# TODO find 'X' button
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Space game menu")
 
@@ -19,6 +19,7 @@ try:
 	quit_button_img = pygame.image.load('images/buttons/QuitButton.png').convert_alpha()
 	credits_button_img = pygame.image.load('images/buttons/QuestionmarkSquareButton.png').convert_alpha()
 	license_button_img = pygame.image.load('images/buttons/InfoSquareButton.png').convert_alpha()
+	x_button_img = pygame.image.load('images/buttons/XSquareButton.png').convert_alpha()
 
 except FileNotFoundError as message:
 	print("An error occured while loading images in menu.py. One or more of them have not been found.\nDownload them again or check if they are in an images folder.")
@@ -41,7 +42,7 @@ def draw_text(text, font, text_col, x, y):
 
 
 #button class
-class Button():
+class Button:
 	def __init__(self, x, y, image, scale):
 		width = image.get_width()
 		height = image.get_height()
@@ -79,47 +80,51 @@ class main_menu():
 		self.quitButton = Button(540, 600, quit_button_img, 0.35)
 		self.creditsButton = Button(1000, 800, credits_button_img, 0.35)
 		self.licenseButton = Button(900, 800, license_button_img, 0.35)
-		self.clicked = False #variable which prevents buttons from getting clicked when they are not visible
+		self.XButton = Button(1030, 50, x_button_img, 0.35)
+		self.clicked = False # variable which prevents buttons from getting clicked when they are not visible
 
 	def controller(self):
 		self.logic()
 
-		if self.state == 0: #pauses the game
+		if self.state == 0: # pauses the game
 			self.main_scene()
 
-		if self.state == 1: #starts game
+		if self.state == 1: # starts game
 			pass 
 
-		if self.state == 2: #shows controls
+		if self.state == 2: # shows controls
 			self.controls_scene()
 
-		if self.state == 4: #credits
+		if self.state == 4: # credits
 			self.credits_scene()
 
-		if self.state == 5: #license
+		if self.state == 5: # license
 			self.license_scene()
 
 
 	def logic(self):
 
-		if self.playButton.draw(screen) and not self.clicked: #start game
+		if self.playButton.draw(screen) and not self.clicked: # start game
 			self.state = 1
 
-		elif self.controlsButton.draw(screen) and not self.clicked:#show controls
+		elif self.controlsButton.draw(screen) and not self.clicked:# show controls
 			self.clicked = True
 			self.state = 2
 
-		elif self.quitButton.draw(screen) and not self.clicked: #quit game
+		elif self.quitButton.draw(screen) and not self.clicked: # quit game
 			self.state = 3
 
-		elif self.creditsButton.draw(screen) and not self.clicked: #credits
+		elif self.creditsButton.draw(screen) and not self.clicked: # credits
 			self.clicked = True
 			self.state = 4
 
-		elif self.licenseButton.draw(screen) and not self.clicked: #license
+		elif self.licenseButton.draw(screen) and not self.clicked: # license
 			self.clicked = True
 			self.state = 5
 
+		elif self.XButton.draw(screen) and self.clicked: # X button
+			self.clicked = False
+			self.state = 0
 
 		# print(self.state)
 
@@ -140,6 +145,7 @@ class main_menu():
 		draw_text('CONTROLS', font, WHITE, SCREEN_WIDTH//2 - 200, 110)
 		draw_text('Arrow keys - movement, SPACEBAR - shoot', font, WHITE, SCREEN_WIDTH//2 - 200, 140)
 		draw_text('ESC - pause/main menu, S - save, L - load', font, WHITE, SCREEN_WIDTH//2 - 200, 170)
+		self.XButton.draw(screen)
 
 
 	def credits_scene(self):
@@ -151,6 +157,8 @@ class main_menu():
 			draw_text(line, font, WHITE, 30, y_offset)
 			y_offset += 40  # Increase y position for next line
 
+		self.XButton.draw(screen)
+
 
 	def license_scene(self):
 		screen.blit(bg_main_img, (0, 0))
@@ -161,8 +169,11 @@ class main_menu():
 			draw_text(line, font, WHITE, 30, y_offset)
 			y_offset += 40  # Increase y position for next line
 
+		self.XButton.draw(screen)
 
-#get data from credits
+
+
+# get data from credits
 try:
 	credits_file = open("CREDITS.md", "r")
 	credits_text = credits_file.read().strip()
@@ -173,7 +184,7 @@ except FileNotFoundError:
 	credits_text = "An error occured\nCREDITS.md was not found. Check if it is in the same folder as\nthe space_game.py and menu.py or if it is downloaded"
 	credits_lines = credits_text.split("\n")
 
-#get data from license
+# get data from license
 try:
 	license_file = open("LICENSE.txt", "r")
 	license_text = license_file.read().strip()
@@ -200,7 +211,7 @@ while run:
 	if main_menu_instance.state != 1:
 		main_menu_instance.controller()
 
-	if main_menu_instance.state == 3: #quit button
+	if main_menu_instance.state == 3: # quit button
 		run = False
 
 	for event in pygame.event.get():
@@ -209,7 +220,7 @@ while run:
 
 		if event.type == pygame.KEYDOWN:
 			if event.key == pygame.K_ESCAPE:
-				main_menu_instance.state = 0 #pause game and show main menu
+				main_menu_instance.state = 0 # pause game and show main menu
 				main_menu_instance.clicked = False
 
 	pygame.display.update()
