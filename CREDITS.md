@@ -2,7 +2,7 @@
 
 ## SPRITES
 
-- Space Station by [Tislom58](https://github.com/Tislom58/)
+- Space Station and ship animation by [Tislom58](https://github.com/Tislom58/)
 - [Asteroid-1](https://pixelartmaker.com/art/6dab6ecf5720fdf)
 - [Ship](https://clipartcraft.com/explore/spaceship-clipart-pixel/)
 - [Asteroid-2](https://pixelartmaker.com/art/b0d28fcc8a7f281)

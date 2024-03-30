@@ -9,6 +9,7 @@ from menu import main_menu
 # TODO: More stations
 # TODO: add some animations, so it doesn't look static
 # TODO: bigger/more maps??
+# you can edit values where 'HERE' is written to suit your needs
 
 pygame.init()
 
@@ -145,6 +146,7 @@ class Ship(pygame.sprite.Sprite):
         self.energy_full = 100
         self.energy = 100
         self.energy_max = pygame.Rect(70, 650, 100, 40)
+        self.multiple_keys = False
         # initial credits
         self.credits = 10
         # storage
@@ -168,7 +170,7 @@ class Ship(pygame.sprite.Sprite):
     def update(self):
         self.action()
         self.moving()
-        if (moving_down or moving_up or moving_left or moving_right) and self.energy > 0:
+        if (moving_down or moving_up or moving_left or moving_right) and self.energy > 0 and not self.multiple_keys:
             self.render_ship_animation() # this runs ship animation logic
         else:
             self.image = ship0_img # this resets ship's frame to idle if it is not moving
@@ -193,21 +195,25 @@ class Ship(pygame.sprite.Sprite):
             if moving_left and self.rect.left >= -30:
                 self.flip = True
                 self.direction = -1
-                self.rect.x -= self.speed
+                self.rect.x -= self.speed * 0.75
                 energy_consumed -= 1
 
             if moving_right and self.rect.right <= SCREEN_WIDTH + 30:
                 self.flip = False
                 self.direction = 1
-                self.rect.x += self.speed
+                self.rect.x += self.speed * 0.75
                 energy_consumed -= 1
 
         if moving_down and moving_up or moving_left and moving_right:
             energy_consumed = 0
+            self.multiple_keys = True
+        
+        else:
+            self.multiple_keys = False
 
         # handle energy consuming (so that it won't burn 2 units if pressing W and S for example)
         if energy_consumed <= -1:
-            self.energy -= 0.3  # change the parameter to adjust energy consuming speed
+            self.energy -= 0.3  # HERE change the parameter to adjust energy consuming speed
 
     def action(self):
         # check for low or max energy
@@ -260,7 +266,7 @@ class Ship(pygame.sprite.Sprite):
 
 
     def render_ship_animation(self):
-        animation_cooldown = 350 # HERE you set up animation speed
+        animation_cooldown = 300 # HERE you set up animation speed
         self.image = self.ship_animation_frames[self.index]
 
         if pygame.time.get_ticks() - self.update_time > animation_cooldown:
