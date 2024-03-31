@@ -9,6 +9,7 @@ from menu import main_menu
 # TODO: More stations
 # TODO: add some animations, so it doesn't look static
 # TODO: bigger/more maps??
+# you can edit values where 'HERE' is written to suit your needs
 
 pygame.init()
 
@@ -16,6 +17,7 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+
 pygame.display.set_caption("Space game v0.2.4.2")
 
 try:
@@ -153,6 +155,7 @@ class Ship(pygame.sprite.Sprite):
         self.energy_full = 100
         self.energy = 100
         self.energy_max = pygame.Rect(70, 650, 100, 40)
+        self.multiple_keys = False
         # initial credits
         self.credits = 10
         # storage
@@ -163,23 +166,25 @@ class Ship(pygame.sprite.Sprite):
         self.damage = 1
 
         # Render ship
-        self.render_state0 = ship0_img
-        self.render_state1 = ship1_img
-        self.render_state2 = ship2_img
+        self.update_time = pygame.time.get_ticks()
+        self.index = 0
+        self.image = ship0_img # default ship frame (idle)
+        self.render_state0 = ship0_img # idle frame
+        self.ship_animation_frames = [ship1_img, ship2_img] # list of moving frames for the ship
 
-        self.state0_rect = self.render_state0.get_rect()
-        self.state1_rect = self.render_state1.get_rect()
-        self.state2_rect = self.render_state2.get_rect()
+        self.rect = self.image.get_rect()
 
-        self.state2_rect.center = (x, y)
+        # self.rect.center = (x, y)
 
     def update(self):
         self.action()
         self.moving()
-        if moving_down or moving_up or moving_left or moving_right:
-            self.render_ship_moving()
+        if (moving_down or moving_up or moving_left or moving_right) and self.energy > 0 and not self.multiple_keys:
+            self.render_ship_animation() # this runs ship animation logic
         else:
-            self.render_ship_stationary()
+            self.image = ship0_img # this resets ship's frame to idle if it is not moving
+
+        self.draw_ship()
 
     def moving(self):
 
@@ -190,8 +195,8 @@ class Ship(pygame.sprite.Sprite):
 
         if self.energy > 0:
 
-            if moving_up and self.state2_rect.top >= 10:
-                self.state2_rect.y -= self.speed * 0.75
+            if moving_up and self.rect.top >= 10:
+                self.rect.y -= self.speed * 0.75
                 energy_consumed -= 1
 
             if moving_down and self.state2_rect.bottom <= screen_height - 10:
@@ -199,23 +204,30 @@ class Ship(pygame.sprite.Sprite):
                 energy_consumed -= 1
 
             if moving_left and self.state2_rect.left >= 0:
+
                 self.flip = True
                 self.direction = -1
-                self.state2_rect.x -= self.speed
+                self.rect.x -= self.speed * 0.75
                 energy_consumed -= 1
 
+
             if moving_right and self.state2_rect.right <= screen_width:
+
                 self.flip = False
                 self.direction = 1
-                self.state2_rect.x += self.speed
+                self.rect.x += self.speed * 0.75
                 energy_consumed -= 1
 
         if moving_down and moving_up or moving_left and moving_right:
             energy_consumed = 0
+            self.multiple_keys = True
+        
+        else:
+            self.multiple_keys = False
 
         # handle energy consuming (so that it won't burn 2 units if pressing W and S for example)
         if energy_consumed <= -1:
-            self.energy -= 0.3  # change the parameter to adjust energy consuming speed
+            self.energy -= 0.3  # HERE change the parameter to adjust energy consuming speed
 
     def action(self):
         # check for low or max energy
@@ -269,18 +281,28 @@ class Ship(pygame.sprite.Sprite):
 
         # shooting
         if shooting and self.cooldown <= 0:
-            laser = Laser(self.state2_rect.centerx + (40 * self.direction), self.state2_rect.centery, self.direction)
+            laser = Laser(self.rect.centerx + (40 * self.direction), self.rect.centery, self.direction)
             laser_group.add(laser)
             Player.energy -= 1
             self.cooldown = 30
 
         self.cooldown -= 1
 
-    def render_ship_stationary(self):
-        screen.blit(pygame.transform.flip(self.render_state0, self.flip, False), self.state2_rect)
 
-    def render_ship_moving(self):
-        screen.blit(pygame.transform.flip(self.render_state2, self.flip, False), self.state2_rect)
+    def render_ship_animation(self):
+        animation_cooldown = 300 # HERE you set up animation speed
+        self.image = self.ship_animation_frames[self.index]
+
+        if pygame.time.get_ticks() - self.update_time > animation_cooldown:
+            self.index += 1
+            self.update_time = pygame.time.get_ticks()
+
+            if self.index > 1:
+                self.index = 0
+
+
+    def draw_ship(self):
+        screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
 
 class Laser(pygame.sprite.Sprite):
@@ -355,7 +377,7 @@ class Station(pygame.sprite.Sprite):
     def action(self):
         self.range.center = self.rect.center
 
-        if self.range.colliderect(Player.state2_rect):
+        if self.range.colliderect(Player.rect):
             draw_text(f'{self.name} Station', font_small, WHITE, self.rect.x - len(self.name) * 3, self.rect.y - 30)
 
             # check what type of station it is
