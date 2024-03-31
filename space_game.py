@@ -173,8 +173,8 @@ class Ship(pygame.sprite.Sprite):
         self.ship_animation_frames = [ship1_img, ship2_img] # list of moving frames for the ship
 
         self.rect = self.image.get_rect()
-
-        # self.rect.center = (x, y)
+        # this sets starting position
+        self.rect.center = (x, y)
 
     def update(self):
         self.action()
@@ -199,11 +199,11 @@ class Ship(pygame.sprite.Sprite):
                 self.rect.y -= self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_down and self.state2_rect.bottom <= screen_height - 10:
-                self.state2_rect.y += self.speed * 0.75
+            if moving_down and self.rect.bottom <= screen_height - 10:
+                self.rect.y += self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_left and self.state2_rect.left >= 0:
+            if moving_left and self.rect.left >= 0:
 
                 self.flip = True
                 self.direction = -1
@@ -211,7 +211,7 @@ class Ship(pygame.sprite.Sprite):
                 energy_consumed -= 1
 
 
-            if moving_right and self.state2_rect.right <= screen_width:
+            if moving_right and self.rect.right <= screen_width:
 
                 self.flip = False
                 self.direction = 1
@@ -316,10 +316,11 @@ class Laser(pygame.sprite.Sprite):
 
     def update(self):
         self.draw()
+        screen_width = pygame.display.get_surface().get_size()[0]
         # move laser
         self.rect.x += (self.speed * self.direction)
 
-        if self.rect.left >= SCREEN_WIDTH or self.rect.right < 0:
+        if self.rect.left >= screen_width or self.rect.right < 0:
             self.kill()
         # check for collision with asteroid
         for asteroid in asteroid_group:
@@ -416,7 +417,7 @@ class Asteroid(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         # select random spawn point
         self.randomx = random.randint(500, SCREEN_WIDTH - 60)
-        self.randomy = random.randint(60, SCREEN_HEIGHT - 300)
+        self.randomy = random.randint(120, SCREEN_HEIGHT - 200)
         self.rect.center = (self.randomx, self.randomy)
 
     def determine_type(self):
@@ -482,10 +483,7 @@ class Debris(pygame.sprite.Sprite):
     def update(self):
         self.draw()
         # check if the debris is collected by the player
-        if ((self.rect.colliderect(Player.state0_rect)
-                or self.rect.colliderect(Player.state1_rect)
-                or self.rect.colliderect(Player.state2_rect))
-                and Player.storage < Player.storage_max):
+        if (self.rect.colliderect(Player.rect) and Player.storage < Player.storage_max):
             if self.rarity == "rare":
                 self.kill()
                 Player.storage += 1.5 * round(random.uniform(1, 3), 2)
@@ -530,7 +528,7 @@ class Button:
 
 
 # declare instances
-Player = Ship(500, 200, 10)
+Player = Ship(200, 600, 10)
 station = Station('Energy & Trade', 200, 400)
 # asteroid things
 asteroid = Asteroid("common")
