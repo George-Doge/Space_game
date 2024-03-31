@@ -15,42 +15,57 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
-pygame.display.set_caption("Space game v0.2.4")
+pygame.display.set_caption("Space game v0.2.4.2")
 
-# load pictures
-background_img = pygame.image.load('images/background/space3.jpeg').convert_alpha()
-background_img = pygame.transform.scale(background_img, (SCREEN_WIDTH + 200, SCREEN_HEIGHT))
+try:
+    # load pictures
+    background_img = pygame.image.load('images/background/space3.jpeg').convert_alpha()
+    background_img = pygame.transform.scale(background_img, (SCREEN_WIDTH + 200, SCREEN_HEIGHT))
 
-ship_img = pygame.image.load('images/sprites/ship/ship.png').convert_alpha()
-ship_img = pygame.transform.scale(ship_img, (60, 75))
-ship_img = pygame.transform.rotate(ship_img, 270)
+    # ship_img = pygame.image.load('images/sprites/ship.png').convert_alpha()
+    # ship_img = pygame.transform.scale(ship_img, (60, 75))
+    # ship_img = pygame.transform.rotate(ship_img, 270)
 
-ship0_img = pygame.image.load('images/sprites/ship/ship-state0.png').convert_alpha()
-ship0_img = pygame.transform.rotate(ship0_img, 270)
+    ship0_img = pygame.image.load('images/sprites/ship/ship-state0.png').convert_alpha()
+    ship0_img = pygame.transform.rotate(ship0_img, 270)
 
-ship1_img = pygame.image.load('images/sprites/ship/ship-state1.png').convert_alpha()
-ship1_img = pygame.transform.rotate(ship1_img, 270)
+    ship1_img = pygame.image.load('images/sprites/ship/ship-state1.png').convert_alpha()
+    ship1_img = pygame.transform.rotate(ship1_img, 270)
 
-ship2_img = pygame.image.load('images/sprites/ship/ship-state2.png').convert_alpha()
-ship2_img = pygame.transform.rotate(ship2_img, 270)
+    ship2_img = pygame.image.load('images/sprites/ship/ship-state2.png').convert_alpha()
+    ship2_img = pygame.transform.rotate(ship2_img, 270)
 
-station_img = pygame.image.load('images/sprites/station.png').convert_alpha()
-station_img = pygame.transform.scale(station_img, (100, 100))
+    station_img = pygame.image.load('images/sprites/station.png').convert_alpha()
+    station_img = pygame.transform.scale(station_img, (100, 100))
 
-asteroid_img = pygame.image.load('images/sprites/asteroid/asteroid.png').convert_alpha()
-asteroid_img = pygame.transform.scale(asteroid_img, (60, 60))
+    asteroid_img = pygame.image.load('images/sprites/asteroid/asteroid.png').convert_alpha()
+    asteroid_img = pygame.transform.scale(asteroid_img, (64, 64))
 
-asteroid2_img = pygame.image.load('images/sprites/asteroid/asteroid-2.png').convert_alpha()
-asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
+    debris_common_img = pygame.image.load('images/sprites/asteroid/debris.png').convert_alpha()
 
-laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
+    asteroid2_img = pygame.image.load('images/sprites/asteroid/asteroid-2.png').convert_alpha()
+    asteroid2_img = pygame.transform.scale(asteroid2_img, (64, 64))
 
-energy_bar_img = pygame.image.load('images/buttons/energy_bar.png').convert_alpha()
+    debris_rare_img = pygame.image.load('images/sprites/asteroid/debris_rare.png').convert_alpha()
 
-# button images
-buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
-max_img = pygame.image.load('images/buttons/max.png').convert_alpha()
-sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
+    laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
+
+    energy_bar_img = pygame.image.load('images/buttons/energy_bar.png').convert_alpha()
+
+    # button images
+    buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
+    max_img = pygame.image.load('images/buttons/max.png').convert_alpha()
+    sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
+
+except FileNotFoundError as message:
+    print("An error occurred while loading images in space_game.py. One or more of them have not been "
+          "found.\nDownload them again or check if they are in an images folder.")
+    print(f"Error message:\n{message}")
+
+    with open("errorLog.txt", "w") as file:
+        file.write(str(message))
+
+    exit(1)
 
 # set framerate
 clock = pygame.time.Clock()
@@ -408,6 +423,35 @@ class Asteroid(pygame.sprite.Sprite):
         screen.blit(self.image, self.rect)
 
 
+class Debris(pygame.sprite.Sprite):
+    def __init__(self, rarity, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.rarity = rarity
+        if self.rarity == "rare":
+            self.image = debris_rare_img
+
+        else:
+            self.image = debris_common_img
+
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+    def update(self):
+        self.draw()
+        # check if the debris is collected by the player
+        if self.rect.colliderect(Player.rect) and Player.storage < Player.storage_max:
+            if self.rarity == "rare":
+                self.kill()
+                Player.storage += 1.5 * round(random.uniform(1, 3), 2)
+
+            elif self.rarity == "common":
+                self.kill()
+                Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
+
+    def draw(self):
+        screen.blit(self.image, self.rect)
+
+
 # button class
 class Button:
     def __init__(self, x, y, image, scale):
@@ -445,6 +489,8 @@ station = Station('Energy & Trade', 200, 400)
 # asteroid things
 asteroid = Asteroid("common")
 asteroid_group = pygame.sprite.Group(asteroid)
+# debris things
+debris_group = pygame.sprite.Group()
 # laser things
 laser_group = pygame.sprite.Group()
 
@@ -485,6 +531,8 @@ while run:
         Player.update()
         asteroid_group.update()
         asteroid_group.draw(screen)
+        for debris in debris_group:
+            debris.update()
         laser_group.update()
         laser_group.draw(screen)
 
