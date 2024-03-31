@@ -14,33 +14,33 @@ pygame.init()
 SCREEN_WIDTH = 1080
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Space game v0.2.4")
 
 # load pictures
-background_img = pygame.image.load('images/background/space.png').convert_alpha()
-background_img = pygame.transform.scale(background_img, (SCREEN_WIDTH, SCREEN_HEIGHT - 270))
+background_img = pygame.image.load('images/background/space3.jpeg').convert_alpha()
+background_img = pygame.transform.scale(background_img, (SCREEN_WIDTH + 200, SCREEN_HEIGHT))
 
-ship_img = pygame.image.load('images/sprites/ship.png').convert_alpha()
+ship_img = pygame.image.load('images/sprites/ship/ship.png').convert_alpha()
 ship_img = pygame.transform.scale(ship_img, (60, 75))
 ship_img = pygame.transform.rotate(ship_img, 270)
 
-ship0_img = pygame.image.load('images/sprites/ship-state0.png').convert_alpha()
+ship0_img = pygame.image.load('images/sprites/ship/ship-state0.png').convert_alpha()
 ship0_img = pygame.transform.rotate(ship0_img, 270)
 
-ship1_img = pygame.image.load('images/sprites/ship-state1.png').convert_alpha()
+ship1_img = pygame.image.load('images/sprites/ship/ship-state1.png').convert_alpha()
 ship1_img = pygame.transform.rotate(ship1_img, 270)
 
-ship2_img = pygame.image.load('images/sprites/ship-state2.png').convert_alpha()
+ship2_img = pygame.image.load('images/sprites/ship/ship-state2.png').convert_alpha()
 ship2_img = pygame.transform.rotate(ship2_img, 270)
 
 station_img = pygame.image.load('images/sprites/station.png').convert_alpha()
 station_img = pygame.transform.scale(station_img, (100, 100))
 
-asteroid_img = pygame.image.load('images/sprites/asteroid.png').convert_alpha()
+asteroid_img = pygame.image.load('images/sprites/asteroid/asteroid.png').convert_alpha()
 asteroid_img = pygame.transform.scale(asteroid_img, (60, 60))
 
-asteroid2_img = pygame.image.load('images/sprites/asteroid-2.png').convert_alpha()
+asteroid2_img = pygame.image.load('images/sprites/asteroid/asteroid-2.png').convert_alpha()
 asteroid2_img = pygame.transform.scale(asteroid2_img, (60, 60))
 
 laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
@@ -120,7 +120,7 @@ def draw_background(x):
     # for now there will be just one image printed 3 times which will be moving. Then it will reset
     if main_menu_instance.state == 1:
         for i in range(2):
-            screen.blit(background_img, (x + SCREEN_WIDTH * i, 0))
+            screen.blit(background_img, (0, 0))
 
 
 class Ship(pygame.sprite.Sprite):
@@ -295,7 +295,8 @@ class Station(pygame.sprite.Sprite):
         self.draw()
 
     def energy_station(self):
-        draw_text(f'Buy 10 energy for {self.energy_price} credits?', font_small, WHITE, self.rect.x - 100, self.rect.y + 100)
+        draw_text(f'Buy 10 energy for {self.energy_price} credits?', font_small, WHITE, self.rect.x - 100,
+                  self.rect.y + 100)
 
         if energy_buying and Player.credits > 0 and not Player.energy >= Player.energy_full:
             Player.credits -= self.energy_price
@@ -306,7 +307,8 @@ class Station(pygame.sprite.Sprite):
                 Player.energy += 10
 
     def trade_station(self):
-        draw_text(f'Sell mined asteroids for {self.asteroid_price} credits per t?', font_small, WHITE, self.rect.x - 100,
+        draw_text(f'Sell mined asteroids for {self.asteroid_price} credits per t?', font_small, WHITE,
+                  self.rect.x - 100,
                   self.rect.y + 130)
 
         # selling
@@ -316,7 +318,6 @@ class Station(pygame.sprite.Sprite):
         if selling_all and Player.storage > 0:
             Player.credits += self.asteroid_price + Player.storage
             Player.storage = 0
-
 
     # here, interaction and actions of station are handled
     def action(self):
