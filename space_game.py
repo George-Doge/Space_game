@@ -16,13 +16,14 @@ pygame.init()
 SCREEN_WIDTH = 1080
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+
 pygame.display.set_caption("Space game v0.2.4.2")
 
 try:
     # load pictures
-    background_img = pygame.image.load('images/background/space.png').convert_alpha()
-    background_img = pygame.transform.scale(background_img, (SCREEN_WIDTH, SCREEN_HEIGHT - 270))
+    background_img = pygame.image.load('images/background/space3.jpeg').convert_alpha()
+    # background_img = pygame.transform.scale(background_img, (SCREEN_WIDTH + 200, SCREEN_HEIGHT))
 
     # ship_img = pygame.image.load('images/sprites/ship.png').convert_alpha()
     # ship_img = pygame.transform.scale(ship_img, (60, 75))
@@ -52,13 +53,18 @@ try:
 
     laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
 
+    energy_bar_img = pygame.image.load('images/buttons/energy_bar.png').convert_alpha()
+    storage_bar_img = pygame.image.load('images/buttons/storage_bar.png').convert_alpha()
+    coin_img = pygame.image.load('images/buttons/coin.png').convert_alpha()
+
     # button images
     buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
     max_img = pygame.image.load('images/buttons/max.png').convert_alpha()
     sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
 
 except FileNotFoundError as message:
-    print("An error occured while loading images in space_game.py. One or more of them have not been found.\nDownload them again or check if they are in an images folder.")
+    print("An error occurred while loading images in space_game.py. One or more of them have not been "
+          "found.\nDownload them again or check if they are in an images folder.")
     print(f"Error message:\n{message}")
 
     with open("errorLog.txt", "w") as file:
@@ -78,6 +84,9 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 DARK_BLUE = (0, 48, 78)
 DARK_BLUE_2 = (0, 3, 66)
+ENERGY_BLUE = (33, 150, 243)
+EMPTY_BLACK = (26, 24, 26)
+STORAGE_BROWN = (187, 142, 81)
 font_small = pygame.font.SysFont('Futura', 30)
 font_big = pygame.font.SysFont('Futura', 80)
 
@@ -132,7 +141,7 @@ def draw_background(x):
     # for now there will be just one image printed 3 times which will be moving. Then it will reset
     if main_menu_instance.state == 1:
         for i in range(2):
-            screen.blit(background_img, (x + SCREEN_WIDTH * i, 0))
+            screen.blit(background_img, (0, 0))
 
 
 class Ship(pygame.sprite.Sprite):
@@ -182,23 +191,28 @@ class Ship(pygame.sprite.Sprite):
         energy_consumed = 0
         self.energy = round(self.energy, 2)
 
+        screen_width, screen_height = pygame.display.get_surface().get_size()
+
         if self.energy > 0:
 
             if moving_up and self.rect.top >= 10:
                 self.rect.y -= self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_down and self.rect.bottom <= SCREEN_HEIGHT - 280:
-                self.rect.y += self.speed * 0.75
+            if moving_down and self.state2_rect.bottom <= screen_height - 10:
+                self.state2_rect.y += self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_left and self.rect.left >= -30:
+            if moving_left and self.state2_rect.left >= 0:
+
                 self.flip = True
                 self.direction = -1
                 self.rect.x -= self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_right and self.rect.right <= SCREEN_WIDTH + 30:
+
+            if moving_right and self.state2_rect.right <= screen_width:
+
                 self.flip = False
                 self.direction = 1
                 self.rect.x += self.speed * 0.75
@@ -227,27 +241,37 @@ class Ship(pygame.sprite.Sprite):
             self.energy = self.energy_full
 
         # draw ENERGY gauge
-        draw_text('ENERGY', font_small, WHITE, 70, 620)
-        self.energy_stor = pygame.Rect(70, 650, self.energy, 40)
-        pygame.draw.rect(screen, RED, self.energy_max)
-        pygame.draw.rect(screen, GREEN, self.energy_stor)
+        draw_text('ENERGY', font_small, WHITE, 70, 10)
+        bar_length, bar_width = 48, 7
+        energy_stor = pygame.Rect(25 + bar_length, 50 + bar_width, int(94 * (self.energy / 100)), 36)
+
+        pygame.draw.rect(screen, EMPTY_BLACK, (25 + bar_length, 50 + bar_width, 94, 36))
+        pygame.draw.rect(screen, ENERGY_BLUE, energy_stor)
+        screen.blit(energy_bar_img, (25, 50))
 
         # inventory and money
         self.credits = round(self.credits, 2)
-        draw_text(f'{self.credits} credits', font_small, WHITE, 280, 620)
+        draw_text('COIN', font_small, WHITE, 300, 10)
+        screen.blit(coin_img, (300, 50))
+        draw_text(f'{self.credits}', font_small, WHITE, 350, 55)
 
         if self.credits <= 0:
             self.credits = 0
 
         # cargo
         self.storage = round(self.storage, 2)
-        draw_text(f'Cargo: {self.storage} t ', font_small, WHITE, 500, 620)
+        draw_text('CARGO', font_small, WHITE, 545, 10)
+        cargo_stored = pygame.Rect(500 + bar_length, 50 + bar_width, int(94 * (self.storage / 15)), 36)
+
+        pygame.draw.rect(screen, EMPTY_BLACK, (500 + bar_length, 50 + bar_width, 94, 36))
+        pygame.draw.rect(screen, STORAGE_BROWN, cargo_stored)
+        screen.blit(storage_bar_img, (500, 50))
 
         if self.storage >= self.storage_max * 0.75 and not self.storage == self.storage_max:
-            draw_text(f'Reaching maximum capacity', font_small, RED, 500, 650)
+            draw_text(f'Reaching maximum capacity', font_small, RED, 500, 700)
 
         elif self.storage >= self.storage_max:
-            draw_text(f'Maximum cargo capacity reached', font_small, RED, 500, 650)
+            draw_text(f'Maximum cargo capacity reached', font_small, RED, 500, 700)
 
         if self.storage < 0:
             self.storage = 0
@@ -306,6 +330,7 @@ class Laser(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(self.image, self.rect)
 
+
 class Station(pygame.sprite.Sprite):
     def __init__(self, name, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -324,7 +349,8 @@ class Station(pygame.sprite.Sprite):
         self.draw()
 
     def energy_station(self):
-        draw_text(f'Buy 10 energy for {self.energy_price} credits?', font_small, WHITE, self.rect.x - 100, self.rect.y + 100)
+        draw_text(f'Buy 10 energy for {self.energy_price} credits?', font_small, WHITE, self.rect.x - 100,
+                  self.rect.y + 100)
 
         if energy_buying and Player.credits > 0 and not Player.energy >= Player.energy_full:
             Player.credits -= self.energy_price
@@ -335,7 +361,8 @@ class Station(pygame.sprite.Sprite):
                 Player.energy += 10
 
     def trade_station(self):
-        draw_text(f'Sell mined asteroids for {self.asteroid_price} credits per t?', font_small, WHITE, self.rect.x - 100,
+        draw_text(f'Sell mined asteroids for {self.asteroid_price} credits per t?', font_small, WHITE,
+                  self.rect.x - 100,
                   self.rect.y + 130)
 
         # selling
@@ -345,7 +372,6 @@ class Station(pygame.sprite.Sprite):
         if selling_all and Player.storage > 0:
             Player.credits += self.asteroid_price + Player.storage
             Player.storage = 0
-
 
     # here, interaction and actions of station are handled
     def action(self):
@@ -388,7 +414,7 @@ class Asteroid(pygame.sprite.Sprite):
             self.type = "common"
 
         self.rect = self.image.get_rect()
-        # select random spawnpoint
+        # select random spawn point
         self.randomx = random.randint(500, SCREEN_WIDTH - 60)
         self.randomy = random.randint(60, SCREEN_HEIGHT - 300)
         self.rect.center = (self.randomx, self.randomy)
@@ -453,19 +479,20 @@ class Debris(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
-
     def update(self):
         self.draw()
         # check if the debris is collected by the player
-        for debris in debris_group:
-            if self.rect.colliderect(Player.rect) and Player.storage <= Player.storage_max:
-                if self.rarity == "rare":
-                    self.kill()
-                    Player.storage += 1.5 * round(random.uniform(1, 3), 2)
+        if ((self.rect.colliderect(Player.state0_rect)
+                or self.rect.colliderect(Player.state1_rect)
+                or self.rect.colliderect(Player.state2_rect))
+                and Player.storage < Player.storage_max):
+            if self.rarity == "rare":
+                self.kill()
+                Player.storage += 1.5 * round(random.uniform(1, 3), 2)
 
-                elif self.rarity == "common":
-                    self.kill()
-                    Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
+            elif self.rarity == "common":
+                self.kill()
+                Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
 
     def draw(self):
         screen.blit(self.image, self.rect)
@@ -549,7 +576,8 @@ while run:
 
         station.update()
         asteroid_group.update()
-        debris_group.update()
+        for debris in debris_group:
+            debris.update()
         laser_group.update()
 
     if main_menu_instance.state != 1:
