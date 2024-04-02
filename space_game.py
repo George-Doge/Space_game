@@ -140,8 +140,8 @@ def draw_background(x):
     screen.fill(DARK_BLUE)
     # for now there will be just one image printed 3 times which will be moving. Then it will reset
     if main_menu_instance.state == 1:
-        for i in range(2):
-            screen.blit(background_img, (0, 0))
+        # for i in range(2):
+        screen.blit(background_img, (0, 0))
 
 
 class Ship(pygame.sprite.Sprite):
@@ -556,11 +556,11 @@ while run:
 
     if main_menu_instance.state == 1:
         # here you can change the value to make it slower/faster. I found values around 0.35 to be fine
-        background_offset -= 2
+        # background_offset -= 2
 
-    if background_offset < -SCREEN_WIDTH:  # reset bg_offset so it loops forever
-        background_offset = 0
-
+    # if background_offset < -SCREEN_WIDTH:  # reset bg_offset so it loops forever
+    #     background_offset = 0
+        background_offset = 0 # legacy value from background moving kept in order not to break some things
     draw_background(background_offset)
 
     # updates instances of player and stations and more

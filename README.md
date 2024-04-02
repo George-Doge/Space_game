@@ -5,6 +5,8 @@ Their rate of dropping 'cargo' is randomized every time they are mined. Station 
 Minigame also supports the save and load system. I may add something in the future. You can modify some variables in the code if you want to.
 Check [CREDITS.md](CREDITS.md) for sources. Code in development branch is newer than the main branch, so you can check it out too.
 
+It is recommended to run this game in the default window size (1080x864) or in fulscreen!
+
 ---
 >[!IMPORTANT]
 > To start the game, you must have either `space_game.py`, `space_game.exe` or `space_game` and the `images` folder together!
