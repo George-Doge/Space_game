@@ -6,7 +6,7 @@ pygame.init()
 SCREEN_WIDTH = 1080
 SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Space game menu")
 
 # load pictures
@@ -58,10 +58,10 @@ class Button:
 	def draw(self, surface):
 		action = False
 
-		#get mouse position
+		# get mouse position
 		pos = pygame.mouse.get_pos()
 
-		#check mouseover and clicked conditions
+		# check mouseover and clicked conditions
 		if self.rect.collidepoint(pos):
 			if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
 				action = True
@@ -70,7 +70,7 @@ class Button:
 		if pygame.mouse.get_pressed()[0] == 0:
 			self.clicked = False
 
-		#draw button
+		# draw button
 		surface.blit(self.image, (self.rect.x, self.rect.y))
 
 		return action
@@ -249,35 +249,34 @@ except FileNotFoundError:
 	license_text = "An error occured\nLICENSE.txt was not found. Check if it is in the same folder as\nthe space_game.py and menu.py or if it is downloaded"
 	license_lines = license_text.split("\n")
 
-'''
-run = True
+if __name__ == "__main__":
+	run = True
 
-main_menu_instance = main_menu()
+	main_menu_instance = main_menu()
 
 
-while run:
+	while run:
 
-	clock.tick(FPS)
+		clock.tick(FPS)
 
-	screen.fill(WHITE)
-	draw_text('SAMPLE GAME', font2, BLACK, self.screen_width//2 - 200, SCREEN_HEIGHT//2 - 40)
+		screen.fill(WHITE)
+		draw_text('SAMPLE GAME', font2, BLACK, main_menu_instance.screen_width//2 - 200, SCREEN_HEIGHT//2 - 40)
 
-	if main_menu_instance.state != 1:
-		main_menu_instance.controller()
+		if main_menu_instance.state != 1:
+			main_menu_instance.controller()
 
-	if main_menu_instance.state == 3: # quit button
-		run = False
-
-	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
+		if main_menu_instance.state == 3: # quit button
 			run = False
 
-		if event.type == pygame.KEYDOWN:
-			if event.key == pygame.K_ESCAPE:
-				main_menu_instance.state = 0 # pause game and show main menu
-				main_menu_instance.clicked = False
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				run = False
 
-	pygame.display.update()
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_ESCAPE:
+					main_menu_instance.state = 0 # pause game and show main menu
+					main_menu_instance.clicked = False
 
-pygame.quit()
-'''
+		pygame.display.update()
+
+	pygame.quit()
