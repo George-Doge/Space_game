@@ -7,9 +7,8 @@ import pygame
 from menu import main_menu
 
 # TODO: More stations
-# TODO: add some animations, so it doesn't look static
 # TODO: bigger/more maps??
-# you can edit values where 'HERE' is written to suit your needs
+# * you can edit values where 'HERE' is written to suit your needs
 
 pygame.init()
 
@@ -136,11 +135,9 @@ def draw_text(text, font, text_col, x, y):
     screen.blit(img, (x, y))
 
 
-def draw_background(x):
+def draw_background():
     screen.fill(DARK_BLUE)
-    # for now there will be just one image printed 3 times which will be moving. Then it will reset
     if main_menu_instance.state == 1:
-        # for i in range(2):
         screen.blit(background_img, (0, 0))
 
 
@@ -190,8 +187,6 @@ class Ship(pygame.sprite.Sprite):
 
         energy_consumed = 0
         self.energy = round(self.energy, 2)
-
-        screen_width, screen_height = pygame.display.get_surface().get_size()
 
         if self.energy > 0:
 
@@ -416,8 +411,12 @@ class Asteroid(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         # select random spawn point
-        self.randomx = random.randint(500, SCREEN_WIDTH - 60)
-        self.randomy = random.randint(120, SCREEN_HEIGHT - 200)
+        self.spawn_location()
+
+    def spawn_location(self):
+        # select random spawn point
+        self.randomx = random.randint(500, screen_width - 60)
+        self.randomy = random.randint(120, screen_height - 200)
         self.rect.center = (self.randomx, self.randomy)
 
     def determine_type(self):
@@ -527,6 +526,7 @@ class Button:
         return action
 
 
+screen_width, screen_height = pygame.display.get_surface().get_size()
 # declare instances
 Player = Ship(200, 600, 10)
 station = Station('Energy & Trade', 200, 400)
@@ -552,17 +552,17 @@ while run:
 
     clock.tick(FPS)
 
-    # moves bg a little bit and updates it
-
-    if main_menu_instance.state == 1:
+    # ! legacy code block from paralax background
+    # if main_menu_instance.state == 1:
         # here you can change the value to make it slower/faster. I found values around 0.35 to be fine
         # background_offset -= 2
 
     # if background_offset < -SCREEN_WIDTH:  # reset bg_offset so it loops forever
     #     background_offset = 0
-        background_offset = 0 # legacy value from background moving kept in order not to break some things
-    draw_background(background_offset)
-
+    # !    background_offset = 0  legacy value from paralax background and end of the legacy code block
+    draw_background()
+    # checks changed screen size
+    screen_width, screen_height = pygame.display.get_surface().get_size()
     # updates instances of player and stations and more
     if main_menu_instance.state == 1:  # loads things only when game is unpaused
         energy_buying = buyButton.draw(screen)
