@@ -7,8 +7,8 @@ import pygame
 from menu import main_menu
 
 # TODO: More stations
-# TODO: add some animations, so it doesn't look static
 # TODO: bigger/more maps??
+# * you can edit values where 'HERE' is written to suit your needs
 
 pygame.init()
 
@@ -16,6 +16,7 @@ SCREEN_WIDTH = 1080
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+
 pygame.display.set_caption("Space game v0.2.4.2")
 
 try:
@@ -134,12 +135,10 @@ def draw_text(text, font, text_col, x, y):
     screen.blit(img, (x, y))
 
 
-def draw_background(x):
+def draw_background():
     screen.fill(DARK_BLUE)
-    # for now there will be just one image printed 3 times which will be moving. Then it will reset
     if main_menu_instance.state == 1:
-        for i in range(2):
-            screen.blit(background_img, (0, 0))
+        screen.blit(background_img, (0, 0))
 
 
 class Ship(pygame.sprite.Sprite):
@@ -153,6 +152,7 @@ class Ship(pygame.sprite.Sprite):
         self.energy_full = 100
         self.energy = 100
         self.energy_max = pygame.Rect(70, 650, 100, 40)
+        self.multiple_keys = False
         # initial credits
         self.credits = 10
         # storage
@@ -170,13 +170,13 @@ class Ship(pygame.sprite.Sprite):
         self.ship_animation_frames = [ship1_img, ship2_img] # list of moving frames for the ship
 
         self.rect = self.image.get_rect()
-
-        # self.rect.center = (x, y)
+        # this sets starting position
+        self.rect.center = (x, y)
 
     def update(self):
         self.action()
         self.moving()
-        if (moving_down or moving_up or moving_left or moving_right) and self.energy > 0:
+        if (moving_down or moving_up or moving_left or moving_right) and self.energy > 0 and not self.multiple_keys:
             self.render_ship_animation() # this runs ship animation logic
         else:
             self.image = ship0_img # this resets ship's frame to idle if it is not moving
@@ -188,36 +188,41 @@ class Ship(pygame.sprite.Sprite):
         energy_consumed = 0
         self.energy = round(self.energy, 2)
 
-        screen_width, screen_height = pygame.display.get_surface().get_size()
-
         if self.energy > 0:
 
             if moving_up and self.rect.top >= 10:
                 self.rect.y -= self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_down and self.rect.bottom <= SCREEN_HEIGHT - 280:
+            if moving_down and self.rect.bottom <= screen_height - 10:
                 self.rect.y += self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_left and self.rect.left >= -30:
+            if moving_left and self.rect.left >= 0:
+
                 self.flip = True
                 self.direction = -1
-                self.rect.x -= self.speed
+                self.rect.x -= self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_right and self.rect.right <= SCREEN_WIDTH + 30:
+
+            if moving_right and self.rect.right <= screen_width:
+
                 self.flip = False
                 self.direction = 1
-                self.rect.x += self.speed
+                self.rect.x += self.speed * 0.75
                 energy_consumed -= 1
 
         if moving_down and moving_up or moving_left and moving_right:
             energy_consumed = 0
+            self.multiple_keys = True
+        
+        else:
+            self.multiple_keys = False
 
         # handle energy consuming (so that it won't burn 2 units if pressing W and S for example)
         if energy_consumed <= -1:
-            self.energy -= 0.3  # change the parameter to adjust energy consuming speed
+            self.energy -= 0.3  # HERE change the parameter to adjust energy consuming speed
 
     def action(self):
         # check for low or max energy
@@ -280,7 +285,7 @@ class Ship(pygame.sprite.Sprite):
 
 
     def render_ship_animation(self):
-        animation_cooldown = 350 # HERE you set up animation speed
+        animation_cooldown = 300 # HERE you set up animation speed
         self.image = self.ship_animation_frames[self.index]
 
         if pygame.time.get_ticks() - self.update_time > animation_cooldown:
@@ -306,10 +311,11 @@ class Laser(pygame.sprite.Sprite):
 
     def update(self):
         self.draw()
+        screen_width = pygame.display.get_surface().get_size()[0]
         # move laser
         self.rect.x += (self.speed * self.direction)
 
-        if self.rect.left >= SCREEN_WIDTH or self.rect.right < 0:
+        if self.rect.left >= screen_width or self.rect.right < 0:
             self.kill()
         # check for collision with asteroid
         for asteroid in asteroid_group:
@@ -405,8 +411,12 @@ class Asteroid(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         # select random spawn point
-        self.randomx = random.randint(500, SCREEN_WIDTH - 60)
-        self.randomy = random.randint(60, SCREEN_HEIGHT - 300)
+        self.spawn_location()
+
+    def spawn_location(self):
+        # select random spawn point
+        self.randomx = random.randint(500, screen_width - 60)
+        self.randomy = random.randint(120, screen_height - 200)
         self.rect.center = (self.randomx, self.randomy)
 
     def determine_type(self):
@@ -472,11 +482,10 @@ class Debris(pygame.sprite.Sprite):
     def update(self):
         self.draw()
         # check if the debris is collected by the player
-        for debris in debris_group:
-            if self.rect.colliderect(Player.rect) and Player.storage <= Player.storage_max:
-                if self.rarity == "rare":
-                    self.kill()
-                    Player.storage += 1.5 * round(random.uniform(1, 3), 2)
+        if (self.rect.colliderect(Player.rect) and Player.storage < Player.storage_max):
+            if self.rarity == "rare":
+                self.kill()
+                Player.storage += 1.5 * round(random.uniform(1, 3), 2)
 
             elif self.rarity == "common":
                 self.kill()
@@ -517,8 +526,9 @@ class Button:
         return action
 
 
+screen_width, screen_height = pygame.display.get_surface().get_size()
 # declare instances
-Player = Ship(500, 200, 10)
+Player = Ship(200, 600, 10)
 station = Station('Energy & Trade', 200, 400)
 # asteroid things
 asteroid = Asteroid("common")
@@ -542,17 +552,17 @@ while run:
 
     clock.tick(FPS)
 
-    # moves bg a little bit and updates it
-
-    if main_menu_instance.state == 1:
+    # ! legacy code block from paralax background
+    # if main_menu_instance.state == 1:
         # here you can change the value to make it slower/faster. I found values around 0.35 to be fine
-        background_offset -= 2
+        # background_offset -= 2
 
-    if background_offset < -SCREEN_WIDTH:  # reset bg_offset so it loops forever
-        background_offset = 0
-
-    draw_background(background_offset)
-
+    # if background_offset < -SCREEN_WIDTH:  # reset bg_offset so it loops forever
+    #     background_offset = 0
+    # !    background_offset = 0  legacy value from paralax background and end of the legacy code block
+    draw_background()
+    # checks changed screen size
+    screen_width, screen_height = pygame.display.get_surface().get_size()
     # updates instances of player and stations and more
     if main_menu_instance.state == 1:  # loads things only when game is unpaused
         energy_buying = buyButton.draw(screen)
