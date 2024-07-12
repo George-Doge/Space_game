@@ -165,9 +165,9 @@ class Ship(pygame.sprite.Sprite):
         # Render ship
         self.update_time = pygame.time.get_ticks()
         self.index = 0
-        self.image = ship0_img # default ship frame (idle)
-        self.render_state0 = ship0_img # idle frame
-        self.ship_animation_frames = [ship1_img, ship2_img] # list of moving frames for the ship
+        self.image = ship0_img  # default ship frame (idle)
+        self.render_state0 = ship0_img  # idle frame
+        self.ship_animation_frames = [ship1_img, ship2_img]  # list of moving frames for the ship
 
         self.rect = self.image.get_rect()
         # this sets starting position
@@ -177,9 +177,9 @@ class Ship(pygame.sprite.Sprite):
         self.action()
         self.moving()
         if (moving_down or moving_up or moving_left or moving_right) and self.energy > 0 and not self.multiple_keys:
-            self.render_ship_animation() # this runs ship animation logic
+            self.render_ship_animation()  # this runs ship animation logic
         else:
-            self.image = ship0_img # this resets ship's frame to idle if it is not moving
+            self.image = ship0_img  # this resets ship's frame to idle if it is not moving
 
         self.draw_ship()
 
@@ -199,15 +199,12 @@ class Ship(pygame.sprite.Sprite):
                 energy_consumed -= 1
 
             if moving_left and self.rect.left >= 0:
-
                 self.flip = True
                 self.direction = -1
                 self.rect.x -= self.speed * 0.75
                 energy_consumed -= 1
 
-
             if moving_right and self.rect.right <= screen_width:
-
                 self.flip = False
                 self.direction = 1
                 self.rect.x += self.speed * 0.75
@@ -216,7 +213,7 @@ class Ship(pygame.sprite.Sprite):
         if moving_down and moving_up or moving_left and moving_right:
             energy_consumed = 0
             self.multiple_keys = True
-        
+
         else:
             self.multiple_keys = False
 
@@ -283,9 +280,8 @@ class Ship(pygame.sprite.Sprite):
 
         self.cooldown -= 1
 
-
     def render_ship_animation(self):
-        animation_cooldown = 300 # HERE you set up animation speed
+        animation_cooldown = 300  # HERE you set up animation speed
         self.image = self.ship_animation_frames[self.index]
 
         if pygame.time.get_ticks() - self.update_time > animation_cooldown:
@@ -294,7 +290,6 @@ class Ship(pygame.sprite.Sprite):
 
             if self.index > 1:
                 self.index = 0
-
 
     def draw_ship(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
@@ -525,6 +520,14 @@ class Button:
 
         return action
 
+    def update_pos(self, new_x: int, new_y: int):
+        self.rect.center = (new_x, new_y)
+
+
+def get_screen_size():
+    screen_info = pygame.display.Info()
+    return screen_info.current_w, screen_info.current_h
+
 
 screen_width, screen_height = pygame.display.get_surface().get_size()
 # declare instances
@@ -554,8 +557,8 @@ while run:
 
     # ! legacy code block from paralax background
     # if main_menu_instance.state == 1:
-        # here you can change the value to make it slower/faster. I found values around 0.35 to be fine
-        # background_offset -= 2
+    # here you can change the value to make it slower/faster. I found values around 0.35 to be fine
+    # background_offset -= 2
 
     # if background_offset < -SCREEN_WIDTH:  # reset bg_offset so it loops forever
     #     background_offset = 0
@@ -565,9 +568,14 @@ while run:
     screen_width, screen_height = pygame.display.get_surface().get_size()
     # updates instances of player and stations and more
     if main_menu_instance.state == 1:  # loads things only when game is unpaused
+
+        buyButton.update_pos(105, get_screen_size()[1] - 104)
         energy_buying = buyButton.draw(screen)
+        buyMaxButton.update_pos(225, get_screen_size()[1] - 104)
         energy_all_buying = buyMaxButton.draw(screen)
+        sellButton.update_pos(550, get_screen_size()[1] - 104)
         selling = sellButton.draw(screen)
+        sellMaxButton.update_pos(670, get_screen_size()[1] - 104)
         selling_all = sellMaxButton.draw(screen)
 
         Player.update()
