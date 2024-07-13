@@ -21,7 +21,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE
 pygame.display.set_caption("Space game v0.2.4.2")
 
 # Load images
-image = load.images()
+image = load.game_images()
 
 # set framerate
 clock = pygame.time.Clock()
