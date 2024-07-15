@@ -1,5 +1,5 @@
 import pygame
-
+from sys import exit
 
 def game_images():
     """ Loads all game images into a dictionary and returns it """

@@ -9,8 +9,8 @@ Running this game in the default window size (1080x864) or in fullscreen is reco
 
 ---
 >[!IMPORTANT]
-> When running `space_game.py` (or any executable), you must have the `images` and `menu.py` in the same folder!
-> ![Folder structure image](/README_images/location.png "How to start the game")
+> When running `main` (or any executable) you must have the `images` in the same directory!
+> ![Folder structure image](/README_images/location.png "images directory and an executable in same directory")
 
 ---
 ## VERSION 0.2.4.3

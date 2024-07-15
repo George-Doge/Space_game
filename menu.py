@@ -1,7 +1,9 @@
+"""
+MAIN MENU implementation explanation
+"""
 import pygame
 
 import load
-from sys import exit
 
 pygame.init()
 
@@ -31,38 +33,38 @@ def draw_text(text, font, text_col, x, y):
 
 
 def get_screen_size():
-	screen_info = pygame.display.Info()
-	return screen_info.current_w, screen_info.current_h
+    screen_info = pygame.display.Info()
+    return screen_info.current_w, screen_info.current_h
 
 # button class
 class Button:
-	def __init__(self, x, y, image, size):
-		self.image = pygame.transform.scale(image, ( int(image.get_width()*size), int(image.get_height()*size) ))
-		self.rect = self.image.get_rect()
-		self.rect.center = (x, y)
-		self.pressed = False
+    def __init__(self, x, y, image, size):
+        self.image = pygame.transform.scale(image, ( int(image.get_width()*size), int(image.get_height()*size) ))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.pressed = False
 
 
-	def action(self):
-		pressed = self.click()
-		self.draw()
+    def action(self):
+        pressed = self.click()
+        self.draw()
 
-		return pressed
+        return pressed
 
-	def click(self):
-		mouse_position = pygame.mouse.get_pos()
-		mouse_press = pygame.mouse.get_pressed()[0]
+    def click(self):
+        mouse_position = pygame.mouse.get_pos()
+        mouse_press = pygame.mouse.get_pressed()[0]
         
-		if self.rect.collidepoint(mouse_position) and self.pressed == False and mouse_press == 1:
-			self.pressed = True
-			return True
+        if self.rect.collidepoint(mouse_position) and self.pressed == False and mouse_press == 1:
+            self.pressed = True
+            return True
 
-		if mouse_press == 0:
-			self.pressed = False
+        if mouse_press == 0:
+            self.pressed = False
 
 
-	def draw(self):
-		screen.blit(self.image, self.rect)
+    def draw(self):
+        screen.blit(self.image, self.rect)
 
 
     def resize_coords(self, x, y):
@@ -70,122 +72,122 @@ class Button:
 
 
 class main_menu():
-	def __init__(self):
-		self.menu_state = 1 # sets default menu state
+    def __init__(self):
+        self.menu_state = 1 # sets default menu state
 
-		self.screen_width, self.screen_height = get_screen_size()
-		
-		self.playButton = Button(self.screen_width//2, self.screen_height//2 - 160, play_button_img, 0.35)
-		self.controlsButton = Button(self.screen_width//2, self.screen_height//2 - 60, controls_button_img, 0.35)
-		self.quitButton = Button(self.screen_width//2, self.screen_height//2 + 140, quit_button_img, 0.35)
-		self.creditsButton = Button(self.screen_width - 50, self.screen_height - 100, credits_button_img, 0.35)
-		self.licenseButton = Button(self.screen_width - 150, self.screen_height - 100, license_button_img, 0.35)
-		self.XButton = Button(self.screen_width - 50, 50, x_button_img, 0.35)
+        self.screen_width, self.screen_height = get_screen_size()
 
-		# windows size change variables
-		self.old_screen_width, self.old_screen_height = get_screen_size()
+        self.playButton = Button(self.screen_width//2, self.screen_height//2 - 160, image['play_button'], 0.35)
+        self.controlsButton = Button(self.screen_width//2, self.screen_height//2 - 60, image['controls_button'], 0.35)
+        self.quitButton = Button(self.screen_width//2, self.screen_height//2 + 140, image['quit_button'], 0.35)
+        self.creditsButton = Button(self.screen_width - 50, self.screen_height - 100, image['credits_button'], 0.35)
+        self.licenseButton = Button(self.screen_width - 150, self.screen_height - 100, image['license_button'], 0.35)
+        self.XButton = Button(self.screen_width - 50, 50, image['x_button'], 0.35)
 
-
-	def main_scene(self):
-		screen.blit(bg_main_img, (0, 0))
-		draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
-		
-		if self.playButton.action() and self.menu_state == 1:
-			self.menu_state = 0 # PAUSE STATE
-
-		if self.quitButton.action() and self.menu_state == 1:
-			self.menu_state = 2 # QUIT STATE
-
-		if self.creditsButton.action() and self.menu_state == 1:
-			self.menu_state = 3 # CREDITS STATE
-
-		if self.licenseButton.action() and self.menu_state == 1:
-			self.menu_state = 4 # LICENSE STATE
-
-		if self.controlsButton.action() and self.menu_state == 1:
-			self.menu_state = 5 # CONTROLS STATE
-
-		self.resize_position()
-
-	def controls_scene(self):
-		screen.blit(bg_main_img, (0, 0))
-		draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
-		draw_text('CONTROLS', font1, WHITE, self.screen_width//2 - 200, 110)
-		draw_text('Arrow keys - movement, SPACEBAR - shoot', font1, WHITE, self.screen_width//2 - 200, 140)
-		draw_text('ESC - pause/main menu, S - save, L - load', font1, WHITE, self.screen_width//2 - 200, 170)
-		
-		if self.XButton.action():
-			self.menu_state = 1
-
-		self.resize_position()
+        # windows size change variables
+        self.old_screen_width, self.old_screen_height = get_screen_size()
 
 
-	def credits_scene(self):
-		screen.blit(bg_main_img, (0, 0))
-		# changes position for fulscreen mode
-		if self.screen_width > SCREEN_WIDTH:
-			draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
-			pygame.draw.rect(screen, BLACK, (self.screen_width//4, 110, 1000, 570))
-			y_offset = 120  # Starting y position for text
-			for line in credits_lines:
-				draw_text(line, font1, WHITE, self.screen_width//4 + 10, y_offset)
-				y_offset += 40  # Increase y position for next line
-		# default windowed resolution
-		else:
-			draw_text('SPACE GAME', font2, WHITE, SCREEN_WIDTH//2 - 200, 20)
-			pygame.draw.rect(screen, BLACK, (20, 110, 1040, 570))
-			y_offset = 120  # Starting y position for text
-			for line in credits_lines:
-				draw_text(line, font1, WHITE, 30, y_offset)
-				y_offset += 40  # Increase y position for next line
+    def main_scene(self):
+        screen.blit(image['main_background'], (0, 0))
+        draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
 
-		if self.XButton.action():
-			self.menu_state = 1
+        if self.playButton.action() and self.menu_state == 1:
+            self.menu_state = 0 # PAUSE STATE
 
-		self.resize_position()
+        if self.quitButton.action() and self.menu_state == 1:
+            self.menu_state = 2 # QUIT STATE
+
+        if self.creditsButton.action() and self.menu_state == 1:
+            self.menu_state = 3 # CREDITS STATE
+
+        if self.licenseButton.action() and self.menu_state == 1:
+            self.menu_state = 4 # LICENSE STATE
+
+        if self.controlsButton.action() and self.menu_state == 1:
+            self.menu_state = 5 # CONTROLS STATE
+
+        self.resize_position()
+
+    def controls_scene(self):
+        screen.blit(image['main_background'], (0, 0))
+        draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
+        draw_text('CONTROLS', font1, WHITE, self.screen_width//2 - 200, 110)
+        draw_text('Arrow keys - movement, SPACEBAR - shoot', font1, WHITE, self.screen_width//2 - 200, 140)
+        draw_text('ESC - pause/main menu, S - save, L - load', font1, WHITE, self.screen_width//2 - 200, 170)
+
+        if self.XButton.action():
+            self.menu_state = 1
+
+        self.resize_position()
 
 
-	def license_scene(self):
-		screen.blit(bg_main_img, (0, 0))
-		# changes position for fulscreen mode
-		if self.screen_width > SCREEN_WIDTH:
-			pygame.draw.rect(screen, BLACK, (self.screen_width//4, 70, 950, 920))
-			draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
-			y_offset = 70  # Starting y position for text
-			for line in license_lines:
-				draw_text(line, font1, WHITE, self.screen_width//4 + 10, y_offset)
-				y_offset += 40  # Increase y position for next line
-		# default windowed mode
-		else:
-			pygame.draw.rect(screen, BLACK, (20, 10, 1040, 870))
-			draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
-			y_offset = 20  # Starting y position for text
-			for line in license_lines:
-				draw_text(line, font1, WHITE, 30, y_offset)
-				y_offset += 40  # Increase y position for next line
+    def credits_scene(self):
+        screen.blit(image['main_background'], (0, 0))
+        # changes position for fulscreen mode
+        if self.screen_width > SCREEN_WIDTH:
+            draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
+            pygame.draw.rect(screen, BLACK, (self.screen_width//4, 110, 1000, 570))
+            y_offset = 120  # Starting y position for text
+            for line in credits_lines:
+                draw_text(line, font1, WHITE, self.screen_width//4 + 10, y_offset)
+                y_offset += 40  # Increase y position for next line
+        # default windowed resolution
+        else:
+            draw_text('SPACE GAME', font2, WHITE, SCREEN_WIDTH//2 - 200, 20)
+            pygame.draw.rect(screen, BLACK, (20, 110, 1040, 570))
+            y_offset = 120  # Starting y position for text
+            for line in credits_lines:
+                draw_text(line, font1, WHITE, 30, y_offset)
+                y_offset += 40  # Increase y position for next line
 
-		if self.XButton.action():
-			self.menu_state = 1
+        if self.XButton.action():
+            self.menu_state = 1
 
-		self.resize_position()
+        self.resize_position()
 
-	# changes position for buttons and things if it is resized
-	def resize_position(self):
 
-		self.screen_width, self.screen_height = get_screen_size()
-		
-		if self.screen_width != self.old_screen_width or self.screen_height != self.old_screen_height:
+    def license_scene(self):
+        screen.blit(image['main_background'], (0, 0))
+        # changes position for fulscreen mode
+        if self.screen_width > SCREEN_WIDTH:
+            pygame.draw.rect(screen, BLACK, (self.screen_width//4, 70, 950, 920))
+            draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
+            y_offset = 70  # Starting y position for text
+            for line in license_lines:
+                draw_text(line, font1, WHITE, self.screen_width//4 + 10, y_offset)
+                y_offset += 40  # Increase y position for next line
+        # default windowed mode
+        else:
+            pygame.draw.rect(screen, BLACK, (20, 10, 1040, 870))
+            draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
+            y_offset = 20  # Starting y position for text
+            for line in license_lines:
+                draw_text(line, font1, WHITE, 30, y_offset)
+                y_offset += 40  # Increase y position for next line
 
-			self.playButton.resize_coords(self.screen_width//2 - 100, self.screen_height//2 - 160)
-			self.controlsButton.resize_coords(self.screen_width//2 - 100, self.screen_height//2 - 60)
-			self.quitButton.resize_coords(self.screen_width//2 - 100, self.screen_height//2 + 140)
+        if self.XButton.action():
+            self.menu_state = 1
 
-			self.creditsButton.resize_coords(self.screen_width - 100, self.screen_height - 100)
-			self.licenseButton.resize_coords(self.screen_width - 200, self.screen_height - 100)
+        self.resize_position()
 
-			self.XButton.resize_coords(self.screen_width - 100, 50)
+    # changes position for buttons and things if it is resized
+    def resize_position(self):
 
-		self.old_screen_width, self.old_screen_height = self.screen_width, self.screen_height
+        self.screen_width, self.screen_height = get_screen_size()
+
+        if self.screen_width != self.old_screen_width or self.screen_height != self.old_screen_height:
+
+            self.playButton.resize_coords(self.screen_width//2 - 100, self.screen_height//2 - 160)
+            self.controlsButton.resize_coords(self.screen_width//2 - 100, self.screen_height//2 - 60)
+            self.quitButton.resize_coords(self.screen_width//2 - 100, self.screen_height//2 + 140)
+
+            self.creditsButton.resize_coords(self.screen_width - 100, self.screen_height - 100)
+            self.licenseButton.resize_coords(self.screen_width - 200, self.screen_height - 100)
+
+            self.XButton.resize_coords(self.screen_width - 100, 50)
+
+        self.old_screen_width, self.old_screen_height = self.screen_width, self.screen_height
 
 
 
@@ -223,29 +225,29 @@ if __name__ == "__main__":
         screen.fill(WHITE)
         draw_text('SAMPLE GAME', font2, BLACK, main_menu_instance.screen_width // 2 - 200, SCREEN_HEIGHT // 2 - 40)
 
-		if main_menu_instance.menu_state == 1:
-			main_menu_instance.main_scene()
+        if main_menu_instance.menu_state == 1:
+            main_menu_instance.main_scene()
 
-		if main_menu_instance.menu_state == 2: # quit
-			run = False
+        if main_menu_instance.menu_state == 2: # quit
+            run = False
 
-		if main_menu_instance.menu_state == 3:
-			main_menu_instance.credits_scene()
+        if main_menu_instance.menu_state == 3:
+            main_menu_instance.credits_scene()
 
-		if main_menu_instance.menu_state == 4:
-			main_menu_instance.license_scene()
+        if main_menu_instance.menu_state == 4:
+            main_menu_instance.license_scene()
 
-		if main_menu_instance.menu_state == 5:
-			main_menu_instance.controls_scene()
+        if main_menu_instance.menu_state == 5:
+            main_menu_instance.controls_scene()
 
-		for event in pygame.event.get():
-			if event.type == pygame.QUIT:
-				run = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
 
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_ESCAPE:
-					main_menu_instance.menu_state = 1 # pause game and show main menu
-					# main_menu_instance.clicked = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    main_menu_instance.menu_state = 1 # pause game and show main menu
+                    # main_menu_instance.clicked = False
 
 
         pygame.display.update()

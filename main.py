@@ -1,7 +1,6 @@
 import json
 import random
 import load
-from sys import exit
 
 import pygame
 
@@ -78,7 +77,7 @@ def draw_text(text, font, text_col, x, y):
 def draw_background():
     screen.fill(DARK_BLUE)
 
-    if main_menu_instance.state == 0:
+    if main_menu_instance.menu_state == 0:
         screen.blit(image['background'], (0, 0))
 
 
