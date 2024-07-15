@@ -538,7 +538,7 @@ while run:
 
     if main_menu_instance.menu_state == 1:
         main_menu_instance.main_scene()
-    
+
     if main_menu_instance.menu_state == 2:
         run = False
 
