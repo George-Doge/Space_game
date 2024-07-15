@@ -38,6 +38,8 @@ def game_images():
         image['buy_button'] = pygame.image.load('images/buttons/buy.png').convert_alpha()
         image['max_button'] = pygame.image.load('images/buttons/max.png').convert_alpha()
         image['sell_button'] = pygame.image.load('images/buttons/sell.png').convert_alpha()
+        image['upgrade_button_active'] = pygame.image.load('images/buttons/upgrade_active.png').convert_alpha()
+        image['upgrade_button_inactive'] = pygame.image.load('images/buttons/upgrade_inactive.png').convert_alpha()
 
         return image
 
