@@ -1,4 +1,5 @@
 import pygame
+from sys import exit
 
 
 def game_images():

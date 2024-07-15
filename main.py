@@ -1,7 +1,6 @@
 import json
 import random
 import load
-from sys import exit
 
 import pygame
 
@@ -18,7 +17,7 @@ SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 
-pygame.display.set_caption("Space game v0.2.4.2")
+pygame.display.set_caption("Space game v0.2.4.3")
 
 # Load images
 image = load.game_images()
@@ -40,18 +39,6 @@ EMPTY_BLACK = (26, 24, 26)
 STORAGE_BROWN = (187, 142, 81)
 font_small = pygame.font.SysFont('Futura', 30)
 font_big = pygame.font.SysFont('Futura', 80)
-
-# variables
-moving_up = False
-moving_down = False
-moving_left = False
-moving_right = False
-energy_buying = False
-energy_all_buying = False
-selling = False
-selling_all = False
-shooting = False
-background_offset = 0
 
 
 # Saving/loading function
@@ -89,7 +76,8 @@ def draw_text(text, font, text_col, x, y):
 
 def draw_background():
     screen.fill(DARK_BLUE)
-    if main_menu_instance.state == 1:
+
+    if main_menu_instance.menu_state == 0:
         screen.blit(image['background'], (0, 0))
 
 
@@ -125,11 +113,20 @@ class Ship(pygame.sprite.Sprite):
         # this sets starting position
         self.rect.center = (x, y)
 
+        # variables
+        self.moving_up = False
+        self.moving_down = False
+        self.moving_left = False
+        self.moving_right = False
+        self.shooting = False
+
     def update(self):
         self.action()
         self.moving()
-        if (moving_down or moving_up or moving_left or moving_right) and self.energy > 0 and not self.multiple_keys:
-            self.render_ship_animation()  # this runs ship animation logic
+
+        if (self.moving_down or self.moving_up or self.moving_left or self.moving_right) and self.energy > 0 and not self.multiple_keys:
+            self.render_ship_animation() # this runs ship animation logic
+
         else:
             self.image = image['ship_0']  # this resets ship's frame to idle if it is not moving
 
@@ -140,29 +137,34 @@ class Ship(pygame.sprite.Sprite):
         energy_consumed = 0
         self.energy = round(self.energy, 2)
 
-        if self.energy > 0:
+        if self.energy > 0 and not self.multiple_keys:
 
-            if moving_up and self.rect.top >= 10:
+            if self.moving_up and self.rect.top >= 10:
                 self.rect.y -= self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_down and self.rect.bottom <= screen_height - 10:
+            if self.moving_down and self.rect.bottom <= screen_height - 10:
                 self.rect.y += self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_left and self.rect.left >= 0:
+            if self.moving_left and self.rect.left >= 0:
+
+
                 self.flip = True
                 self.direction = -1
                 self.rect.x -= self.speed * 0.75
                 energy_consumed -= 1
 
-            if moving_right and self.rect.right <= screen_width:
+
+            if self.moving_right and self.rect.right <= screen_width:
+
+
                 self.flip = False
                 self.direction = 1
                 self.rect.x += self.speed * 0.75
                 energy_consumed -= 1
 
-        if moving_down and moving_up or moving_left and moving_right:
+        if (self.moving_down and self.moving_up) or (self.moving_left and self.moving_right):
             energy_consumed = 0
             self.multiple_keys = True
 
@@ -224,7 +226,7 @@ class Ship(pygame.sprite.Sprite):
             self.storage = self.storage_max
 
         # shooting
-        if shooting and self.cooldown <= 0:
+        if self.shooting and self.cooldown <= 0:
             laser = Laser(self.rect.centerx + (40 * self.direction), self.rect.centery, self.direction)
             laser_group.add(laser)
             Player.energy -= 1
@@ -383,6 +385,9 @@ class Asteroid(pygame.sprite.Sprite):
         max_number_of_asteroids = 6  # HERE change to modify max number of asteroids
         number_of_asteroids = len(asteroid_group)
 
+        if self.rect.x >= screen_width:
+            self.kill()
+
         if self.health <= 0:
 
             if self.type == "common":  # add mined storage in case of a common asteroid
@@ -507,19 +512,12 @@ while run:
 
     clock.tick(FPS)
 
-    # ! legacy code block from paralax background
-    # if main_menu_instance.state == 1:
-    # here you can change the value to make it slower/faster. I found values around 0.35 to be fine
-    # background_offset -= 2
 
-    # if background_offset < -SCREEN_WIDTH:  # reset bg_offset so it loops forever
-    #     background_offset = 0
-    # !    background_offset = 0  legacy value from paralax background and end of the legacy code block
     draw_background()
     # checks changed screen size
     screen_width, screen_height = pygame.display.get_surface().get_size()
     # updates instances of player and stations and more
-    if main_menu_instance.state == 1:  # loads things only when game is unpaused
+    if main_menu_instance.menu_state == 0:  # loads things only when game is unpaused
 
         buyButton.update_pos(105, get_screen_size()[1] - 104)
         energy_buying = buyButton.draw(screen)
@@ -538,11 +536,20 @@ while run:
             debris.update()
         laser_group.update()
 
-    if main_menu_instance.state != 1:
-        main_menu_instance.controller()
+    if main_menu_instance.menu_state == 1:
+        main_menu_instance.main_scene()
 
-    if main_menu_instance.state == 3:  # quit button
+    if main_menu_instance.menu_state == 2:
         run = False
+
+    if main_menu_instance.menu_state == 3:
+        main_menu_instance.credits_scene()
+
+    if main_menu_instance.menu_state == 4:
+        main_menu_instance.license_scene()
+
+    if main_menu_instance.menu_state == 5:
+        main_menu_instance.controls_scene()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -550,49 +557,48 @@ while run:
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                main_menu_instance.state = 0
-                main_menu_instance.clicked = False
+                main_menu_instance.menu_state = 1
 
             # ship movement
             if event.key == pygame.K_UP:
-                moving_up = True
+                Player.moving_up = True
 
             if event.key == pygame.K_DOWN:
-                moving_down = True
+                Player.moving_down = True
 
             if event.key == pygame.K_LEFT:
-                moving_left = True
+                Player.moving_left = True
 
             if event.key == pygame.K_RIGHT:
-                moving_right = True
+                Player.moving_right = True
 
             if event.key == pygame.K_SPACE:
-                shooting = True
+                Player.shooting = True
 
             # saving and loading
-            if event.key == pygame.K_s and main_menu_instance.state == 1:
+            if event.key == pygame.K_s and main_menu_instance.menu_state == 0:
                 # check if the game is running, so player can't load/save when paused
                 saving()
 
-            if event.key == pygame.K_l and main_menu_instance.state == 1:
+            if event.key == pygame.K_l and main_menu_instance.menu_state == 0:
                 loading()
 
         if event.type == pygame.KEYUP:
             # ship movement
             if event.key == pygame.K_UP:
-                moving_up = False
+                Player.moving_up = False
 
             if event.key == pygame.K_DOWN:
-                moving_down = False
+                Player.moving_down = False
 
             if event.key == pygame.K_LEFT:
-                moving_left = False
+                Player.moving_left = False
 
             if event.key == pygame.K_RIGHT:
-                moving_right = False
+                Player.moving_right = False
 
             if event.key == pygame.K_SPACE:
-                shooting = False
+                Player.shooting = False
 
     pygame.display.update()
 
