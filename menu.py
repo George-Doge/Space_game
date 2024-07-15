@@ -45,6 +45,10 @@ def draw_text(text, font, text_col, x, y):
 	screen.blit(img, (x, y))
 
 
+def get_screen_size():
+	screen_info = pygame.display.Info()
+	return screen_info.current_w, screen_info.current_h
+
 # button class
 class Button:
 	def __init__(self, x, y, image, size):
@@ -84,7 +88,7 @@ class main_menu():
 	def __init__(self):
 		self.menu_state = 1 # sets default menu state
 
-		self.screen_width, self.screen_height = pygame.display.get_surface().get_size()
+		self.screen_width, self.screen_height = get_screen_size()
 		
 		self.playButton = Button(self.screen_width//2, self.screen_height//2 - 160, play_button_img, 0.35)
 		self.controlsButton = Button(self.screen_width//2, self.screen_height//2 - 60, controls_button_img, 0.35)
@@ -94,7 +98,7 @@ class main_menu():
 		self.XButton = Button(self.screen_width - 50, 50, x_button_img, 0.35)
 
 		# windows size change variables
-		self.old_screen_width, self.old_screen_height = pygame.display.get_surface().get_size()
+		self.old_screen_width, self.old_screen_height = get_screen_size()
 
 
 	def main_scene(self):
@@ -116,6 +120,8 @@ class main_menu():
 		if self.controlsButton.action() and self.menu_state == 1:
 			self.menu_state = 5 # CONTROLS STATE
 
+		self.resize_position()
+
 	def controls_scene(self):
 		screen.blit(bg_main_img, (0, 0))
 		draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
@@ -125,6 +131,8 @@ class main_menu():
 		
 		if self.XButton.action():
 			self.menu_state = 1
+
+		self.resize_position()
 
 
 	def credits_scene(self):
@@ -149,6 +157,8 @@ class main_menu():
 		if self.XButton.action():
 			self.menu_state = 1
 
+		self.resize_position()
+
 
 	def license_scene(self):
 		screen.blit(bg_main_img, (0, 0))
@@ -172,10 +182,12 @@ class main_menu():
 		if self.XButton.action():
 			self.menu_state = 1
 
+		self.resize_position()
+
 	# changes position for buttons and things if it is resized
 	def resize_position(self):
 
-		self.screen_width, self.screen_height = pygame.display.get_surface().get_size()
+		self.screen_width, self.screen_height = get_screen_size()
 		
 		if self.screen_width != self.old_screen_width or self.screen_height != self.old_screen_height:
 

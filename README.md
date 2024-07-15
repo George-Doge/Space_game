@@ -13,7 +13,7 @@ Running this game in the default window size (1080x864) or in fullscreen is reco
 > ![Folder structure image](/README_images/location.png "How to start the game")
 
 ---
-## VERSION 0.2.4.2
+## VERSION 0.2.4.3
 - [x] MINING & SELLING
 - [x] SAVE & LOAD
 - [X] MORE ASTEROID TYPES

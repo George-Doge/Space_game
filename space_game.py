@@ -17,7 +17,7 @@ SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 
-pygame.display.set_caption("Space game v0.2.4.2")
+pygame.display.set_caption("Space game v0.2.4.3")
 
 try:
     # load pictures
