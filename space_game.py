@@ -1,5 +1,6 @@
 import json
 import random
+import load
 from sys import exit
 
 import pygame
@@ -19,57 +20,8 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE
 
 pygame.display.set_caption("Space game v0.2.4.3")
 
-try:
-    # load pictures
-    background_img = pygame.image.load('images/background/space3.jpeg').convert_alpha()
-    # background_img = pygame.transform.scale(background_img, (SCREEN_WIDTH + 200, SCREEN_HEIGHT))
-
-    # ship_img = pygame.image.load('images/sprites/ship.png').convert_alpha()
-    # ship_img = pygame.transform.scale(ship_img, (60, 75))
-    # ship_img = pygame.transform.rotate(ship_img, 270)
-
-    ship0_img = pygame.image.load('images/sprites/ship/ship-state0.png').convert_alpha()
-    ship0_img = pygame.transform.rotate(ship0_img, 270)
-
-    ship1_img = pygame.image.load('images/sprites/ship/ship-state1.png').convert_alpha()
-    ship1_img = pygame.transform.rotate(ship1_img, 270)
-
-    ship2_img = pygame.image.load('images/sprites/ship/ship-state2.png').convert_alpha()
-    ship2_img = pygame.transform.rotate(ship2_img, 270)
-
-    station_img = pygame.image.load('images/sprites/station.png').convert_alpha()
-    station_img = pygame.transform.scale(station_img, (100, 100))
-
-    asteroid_img = pygame.image.load('images/sprites/asteroid/asteroid.png').convert_alpha()
-    asteroid_img = pygame.transform.scale(asteroid_img, (64, 64))
-
-    debris_common_img = pygame.image.load('images/sprites/asteroid/debris.png').convert_alpha()
-
-    asteroid2_img = pygame.image.load('images/sprites/asteroid/asteroid-2.png').convert_alpha()
-    asteroid2_img = pygame.transform.scale(asteroid2_img, (64, 64))
-
-    debris_rare_img = pygame.image.load('images/sprites/asteroid/debris_rare.png').convert_alpha()
-
-    laser_img = pygame.image.load('images/sprites/laser.png').convert_alpha()
-
-    energy_bar_img = pygame.image.load('images/buttons/energy_bar.png').convert_alpha()
-    storage_bar_img = pygame.image.load('images/buttons/storage_bar.png').convert_alpha()
-    coin_img = pygame.image.load('images/buttons/coin.png').convert_alpha()
-
-    # button images
-    buy_img = pygame.image.load('images/buttons/buy.png').convert_alpha()
-    max_img = pygame.image.load('images/buttons/max.png').convert_alpha()
-    sell_img = pygame.image.load('images/buttons/sell.png').convert_alpha()
-
-except FileNotFoundError as message:
-    print("An error occurred while loading images in space_game.py. One or more of them have not been "
-          "found.\nDownload them again or check if they are in an images folder.")
-    print(f"Error message:\n{message}")
-
-    with open("errorLog.txt", "w") as file:
-        file.write(str(message))
-
-    exit(1)
+# Load images
+image = load.game_images()
 
 # set framerate
 clock = pygame.time.Clock()
@@ -125,8 +77,9 @@ def draw_text(text, font, text_col, x, y):
 
 def draw_background():
     screen.fill(DARK_BLUE)
-    if main_menu_instance.menu_state == 0:
-        screen.blit(background_img, (0, 0))
+
+    if main_menu_instance.state == 0:
+        screen.blit(image['background'], (0, 0))
 
 
 class Ship(pygame.sprite.Sprite):
@@ -153,9 +106,9 @@ class Ship(pygame.sprite.Sprite):
         # Render ship
         self.update_time = pygame.time.get_ticks()
         self.index = 0
-        self.image = ship0_img # default ship frame (idle)
-        self.render_state0 = ship0_img # idle frame
-        self.ship_animation_frames = [ship1_img, ship2_img] # list of moving frames for the ship
+        self.image = image['ship_0']  # default ship frame (idle)
+        self.render_state0 = image['ship_0']  # idle frame
+        self.ship_animation_frames = [image['ship_1'], image['ship_2']]  # list of moving frames for the ship
 
         self.rect = self.image.get_rect()
         # this sets starting position
@@ -171,10 +124,12 @@ class Ship(pygame.sprite.Sprite):
     def update(self):
         self.action()
         self.moving()
+
         if (self.moving_down or self.moving_up or self.moving_left or self.moving_right) and self.energy > 0 and not self.multiple_keys:
             self.render_ship_animation() # this runs ship animation logic
+
         else:
-            self.image = ship0_img # this resets ship's frame to idle if it is not moving
+            self.image = image['ship_0']  # this resets ship's frame to idle if it is not moving
 
         self.draw_ship()
 
@@ -195,6 +150,7 @@ class Ship(pygame.sprite.Sprite):
 
             if self.moving_left and self.rect.left >= 0:
 
+
                 self.flip = True
                 self.direction = -1
                 self.rect.x -= self.speed * 0.75
@@ -202,6 +158,7 @@ class Ship(pygame.sprite.Sprite):
 
 
             if self.moving_right and self.rect.right <= screen_width:
+
 
                 self.flip = False
                 self.direction = 1
@@ -211,7 +168,7 @@ class Ship(pygame.sprite.Sprite):
         if (self.moving_down and self.moving_up) or (self.moving_left and self.moving_right):
             energy_consumed = 0
             self.multiple_keys = True
-        
+
         else:
             self.multiple_keys = False
 
@@ -237,12 +194,12 @@ class Ship(pygame.sprite.Sprite):
 
         pygame.draw.rect(screen, EMPTY_BLACK, (25 + bar_length, 50 + bar_width, 94, 36))
         pygame.draw.rect(screen, ENERGY_BLUE, energy_stor)
-        screen.blit(energy_bar_img, (25, 50))
+        screen.blit(image['energy_bar'], (25, 50))
 
         # inventory and money
         self.credits = round(self.credits, 2)
         draw_text('COIN', font_small, WHITE, 300, 10)
-        screen.blit(coin_img, (300, 50))
+        screen.blit(image['coin'], (300, 50))
         draw_text(f'{self.credits}', font_small, WHITE, 350, 55)
 
         if self.credits <= 0:
@@ -255,7 +212,7 @@ class Ship(pygame.sprite.Sprite):
 
         pygame.draw.rect(screen, EMPTY_BLACK, (500 + bar_length, 50 + bar_width, 94, 36))
         pygame.draw.rect(screen, STORAGE_BROWN, cargo_stored)
-        screen.blit(storage_bar_img, (500, 50))
+        screen.blit(image['storage_bar'], (500, 50))
 
         if self.storage >= self.storage_max * 0.75 and not self.storage == self.storage_max:
             draw_text(f'Reaching maximum capacity', font_small, RED, 500, 700)
@@ -278,9 +235,8 @@ class Ship(pygame.sprite.Sprite):
 
         self.cooldown -= 1
 
-
     def render_ship_animation(self):
-        animation_cooldown = 300 # HERE you set up animation speed
+        animation_cooldown = 300  # HERE you set up animation speed
         self.image = self.ship_animation_frames[self.index]
 
         if pygame.time.get_ticks() - self.update_time > animation_cooldown:
@@ -290,7 +246,6 @@ class Ship(pygame.sprite.Sprite):
             if self.index > 1:
                 self.index = 0
 
-
     def draw_ship(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
@@ -298,7 +253,7 @@ class Ship(pygame.sprite.Sprite):
 class Laser(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
         pygame.sprite.Sprite.__init__(self)
-        self.image = laser_img
+        self.image = image['laser']
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.direction = direction
@@ -325,7 +280,7 @@ class Laser(pygame.sprite.Sprite):
 class Station(pygame.sprite.Sprite):
     def __init__(self, name, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = station_img
+        self.image = image['station']
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.range = pygame.Rect(0, 0, 300, 300)
@@ -393,15 +348,15 @@ class Asteroid(pygame.sprite.Sprite):
         self.type = rarity
         # determines what type of asteroid it should show and gives it properties
         if rarity == "common":
-            self.image = asteroid_img
+            self.image = image['asteroid']
             self.health = 30
 
         elif rarity == "rare":
-            self.image = asteroid2_img
+            self.image = image['asteroid_2']
             self.health = 40
         # in case of error shows basic asteroid
         else:
-            self.image = asteroid_img
+            self.image = image['asteroid']
             self.type = "common"
 
         self.rect = self.image.get_rect()
@@ -469,10 +424,10 @@ class Debris(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.rarity = rarity
         if self.rarity == "rare":
-            self.image = debris_rare_img
+            self.image = image['debris_rare']
 
         else:
-            self.image = debris_common_img
+            self.image = image['debris_common']
 
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -523,6 +478,14 @@ class Button:
 
         return action
 
+    def update_pos(self, new_x: int, new_y: int):
+        self.rect.center = (new_x, new_y)
+
+
+def get_screen_size():
+    screen_info = pygame.display.Info()
+    return screen_info.current_w, screen_info.current_h
+
 
 screen_width, screen_height = pygame.display.get_surface().get_size()
 # declare instances
@@ -537,10 +500,10 @@ debris_group = pygame.sprite.Group()
 laser_group = pygame.sprite.Group()
 
 # buttons
-buyButton = Button(105, 760, buy_img, 1)
-buyMaxButton = Button(225, 760, max_img, 1)
-sellButton = Button(550, 760, sell_img, 1)
-sellMaxButton = Button(670, 760, max_img, 1)
+buyButton = Button(105, 760, image['buy_button'], 1)
+buyMaxButton = Button(225, 760, image['max_button'], 1)
+sellButton = Button(550, 760, image['sell_button'], 1)
+sellMaxButton = Button(670, 760, image['max_button'], 1)
 
 # main menu instance
 main_menu_instance = main_menu()
@@ -550,14 +513,20 @@ while run:
 
     clock.tick(FPS)
 
+
     draw_background()
     # checks changed screen size
     screen_width, screen_height = pygame.display.get_surface().get_size()
     # updates instances of player and stations and more
     if main_menu_instance.menu_state == 0:  # loads things only when game is unpaused
+
+        buyButton.update_pos(105, get_screen_size()[1] - 104)
         energy_buying = buyButton.draw(screen)
+        buyMaxButton.update_pos(225, get_screen_size()[1] - 104)
         energy_all_buying = buyMaxButton.draw(screen)
+        sellButton.update_pos(550, get_screen_size()[1] - 104)
         selling = sellButton.draw(screen)
+        sellMaxButton.update_pos(670, get_screen_size()[1] - 104)
         selling_all = sellMaxButton.draw(screen)
 
         Player.update()

@@ -1,34 +1,18 @@
 import pygame
-from sys import exit 
+
+import load
+from sys import exit
 
 pygame.init()
 
 SCREEN_WIDTH = 1080
-SCREEN_HEIGHT =  int(SCREEN_WIDTH * 0.8)
+SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("Space game menu")
 
 # load pictures
-try:
-	bg_main_img = pygame.image.load('images/background/asteroid_belt.jpg')
-	bg_main_img = pygame.transform.scale(bg_main_img, (1920, 1080))
-
-	play_button_img = pygame.image.load('images/buttons/PlayButton.png').convert_alpha()
-	controls_button_img = pygame.image.load('images/buttons/ControlsButton.png').convert_alpha()
-	quit_button_img = pygame.image.load('images/buttons/QuitButton.png').convert_alpha()
-	credits_button_img = pygame.image.load('images/buttons/QuestionmarkSquareButton.png').convert_alpha()
-	license_button_img = pygame.image.load('images/buttons/InfoSquareButton.png').convert_alpha()
-	x_button_img = pygame.image.load('images/buttons/XSquareButton.png').convert_alpha()
-
-except FileNotFoundError as message:
-	print("An error occured while loading images in menu.py. One or more of them have not been found.\nDownload them again or check if they are in an images folder.")
-	print(f"Error message:\n{message}")
-
-	with open("errorLog.txt", "w") as file:
-		file.write(str(message))
-
-	exit(1)
+image = load.menu_images()
 
 # set framerate
 clock = pygame.time.Clock()
@@ -40,9 +24,10 @@ font1 = pygame.font.SysFont('Futura', 30)
 font2 = pygame.font.SysFont('Futura', 80)
 font_small = pygame.font.SysFont('Futura', 10)
 
+
 def draw_text(text, font, text_col, x, y):
-	img = font.render(text, True, text_col)
-	screen.blit(img, (x, y))
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
 
 
 def get_screen_size():
@@ -80,8 +65,8 @@ class Button:
 		screen.blit(self.image, self.rect)
 
 
-	def resize_coords(self, x, y):
-		self.rect.x, self.rect.y = x, y
+    def resize_coords(self, x, y):
+        self.rect.x, self.rect.y = x, y
 
 
 class main_menu():
@@ -203,40 +188,40 @@ class main_menu():
 		self.old_screen_width, self.old_screen_height = self.screen_width, self.screen_height
 
 
+
 # get data from credits
 try:
-	credits_file = open("CREDITS.md", "r")
-	credits_text = credits_file.read().strip()
-	credits_lines = credits_text.split("\n")
-	credits_file.close()
+    credits_file = open("CREDITS.md", "r")
+    credits_text = credits_file.read().strip()
+    credits_lines = credits_text.split("\n")
+    credits_file.close()
 
 except FileNotFoundError:
-	credits_text = "An error occured\nCREDITS.md was not found. Check if it is in the same folder as\nthe space_game.py and menu.py or if it is downloaded"
-	credits_lines = credits_text.split("\n")
+    credits_text = "An error occured\nCREDITS.md was not found. Check if it is in the same folder as\nthe space_game.py and menu.py or if it is downloaded"
+    credits_lines = credits_text.split("\n")
 
 # get data from license
 try:
-	license_file = open("LICENSE.txt", "r")
-	license_text = license_file.read().strip()
-	license_lines = license_text.split("\n")
-	license_file.close()
+    license_file = open("LICENSE.txt", "r")
+    license_text = license_file.read().strip()
+    license_lines = license_text.split("\n")
+    license_file.close()
 
 except FileNotFoundError:
-	license_text = "An error occured\nLICENSE.txt was not found. Check if it is in the same folder as\nthe space_game.py and menu.py or if it is downloaded"
-	license_lines = license_text.split("\n")
+    license_text = "An error occured\nLICENSE.txt was not found. Check if it is in the same folder as\nthe space_game.py and menu.py or if it is downloaded"
+    license_lines = license_text.split("\n")
 
 if __name__ == "__main__":
-	run = True
+    run = True
 
-	main_menu_instance = main_menu()
+    main_menu_instance = main_menu()
 
+    while run:
 
-	while run:
+        clock.tick(FPS)
 
-		clock.tick(FPS)
-
-		screen.fill(WHITE)
-		draw_text('SAMPLE GAME', font2, BLACK, main_menu_instance.screen_width//2 - 200, SCREEN_HEIGHT//2 - 40)
+        screen.fill(WHITE)
+        draw_text('SAMPLE GAME', font2, BLACK, main_menu_instance.screen_width // 2 - 200, SCREEN_HEIGHT // 2 - 40)
 
 		if main_menu_instance.menu_state == 1:
 			main_menu_instance.main_scene()
@@ -262,6 +247,7 @@ if __name__ == "__main__":
 					main_menu_instance.menu_state = 1 # pause game and show main menu
 					# main_menu_instance.clicked = False
 
-		pygame.display.update()
 
-	pygame.quit()
+        pygame.display.update()
+
+    pygame.quit()
