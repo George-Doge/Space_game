@@ -8,6 +8,7 @@ from menu import main_menu
 
 # TODO: More stations
 # TODO: bigger/more maps??
+# TODO: update the UI and the world map
 # * you can edit values where 'HERE' is written to suit your needs
 
 pygame.init()
@@ -17,7 +18,7 @@ SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 
-pygame.display.set_caption("Space game v0.2.4.3")
+pygame.display.set_caption("Space game v0.2.5")
 
 # Load images
 image = load.game_images()
@@ -80,6 +81,19 @@ def draw_background():
     if main_menu_instance.menu_state == 0:
         screen.blit(image['background'], (0, 0))
 
+# sole purpose of this function is to move objects when the player is moving
+def move_objects(movementX, movementY):
+    for asteroid in asteroid_group:
+        x, y = asteroid.rect.center[0] + movementX, asteroid.rect.center[1] + movementY
+        asteroid.rect.center = (x, y)
+
+    for debris in debris_group:
+        x, y = debris.rect.center[0] + movementX, debris.rect.center[1] + movementY
+        debris.rect.center = (x, y)
+
+    stationX, stationY = station_instance.rect.center[0] + movementX, station_instance.rect.center[1] + movementY
+    station_instance.rect.center = (stationX, stationY)
+
 
 class Ship(pygame.sprite.Sprite):
     def __init__(self, x, y, speed):
@@ -111,7 +125,7 @@ class Ship(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         # this sets starting position
-        self.rect.center = (x, y)
+        self.rect.center = (SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
 
         # variables
         self.moving_up = False
@@ -136,33 +150,38 @@ class Ship(pygame.sprite.Sprite):
 
         energy_consumed = 0
         self.energy = round(self.energy, 2)
-
+        movement_variable = round(self.speed * 0.75, 0)
+        
         if self.energy > 0 and not self.multiple_keys:
 
-            if self.moving_up and self.rect.top >= 10:
-                self.rect.y -= self.speed * 0.75
+            if self.moving_up: # and self.rect.top >= 10:
+                # self.rect.y -= movement_variable
                 energy_consumed -= 1
+                move_objects(0, movement_variable)
 
-            if self.moving_down and self.rect.bottom <= screen_height - 10:
-                self.rect.y += self.speed * 0.75
+                
+            if self.moving_down: # and self.rect.bottom <= screen_height - 10:
+                # self.rect.y += movement_variable
                 energy_consumed -= 1
+                move_objects(0, -movement_variable)
 
-            if self.moving_left and self.rect.left >= 0:
 
-
+            if self.moving_left: # and self.rect.left >= 0:
                 self.flip = True
                 self.direction = -1
-                self.rect.x -= self.speed * 0.75
+                # self.rect.x -= movement_variable
                 energy_consumed -= 1
+                move_objects(movement_variable, 0)
 
 
-            if self.moving_right and self.rect.right <= screen_width:
 
-
+            if self.moving_right: # and self.rect.right <= screen_width:
                 self.flip = False
                 self.direction = 1
-                self.rect.x += self.speed * 0.75
+                # self.rect.x += movement_variable
                 energy_consumed -= 1
+                move_objects(-movement_variable, 0)
+
 
         if (self.moving_down and self.moving_up) or (self.moving_left and self.moving_right):
             energy_consumed = 0
@@ -385,20 +404,20 @@ class Asteroid(pygame.sprite.Sprite):
         max_number_of_asteroids = 6  # HERE change to modify max number of asteroids
         number_of_asteroids = len(asteroid_group)
 
-        if self.rect.x >= screen_width:
-            self.kill()
+        # if self.rect.x >= screen_width:
+        #     self.kill()
 
         if self.health <= 0:
 
             if self.type == "common":  # add mined storage in case of a common asteroid
                 # Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
-                debris_instance = Debris(self.type, self.randomx, self.randomy)
+                debris_instance = Debris(self.type, self.rect.center[0], self.rect.center[1])
                 debris_group.add(debris_instance)
                 self.kill()
 
             elif self.type == "rare":  # add in case of a rare asteroid
                 # Player.storage += 1.5 * round(random.uniform(1, 3), 2)
-                debris_instance = Debris(self.type, self.randomx, self.randomy)
+                debris_instance = Debris(self.type, self.rect.center[0], self.rect.center[1])
                 debris_group.add(debris_instance)
                 self.kill()
 
@@ -444,7 +463,7 @@ class Debris(pygame.sprite.Sprite):
                 Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
 
     def draw(self):
-        screen.blit(self.image, self.rect)
+        screen.blit(self.image, self.rect.center)
 
 
 # button class
@@ -489,7 +508,7 @@ def get_screen_size():
 screen_width, screen_height = pygame.display.get_surface().get_size()
 # declare instances
 Player = Ship(200, 600, 10)
-station = Station('Energy & Trade', 200, 400)
+station_instance = Station('Energy & Trade', 200, 400)
 # asteroid things
 asteroid = Asteroid("common")
 asteroid_group = pygame.sprite.Group(asteroid)
@@ -530,7 +549,7 @@ while run:
 
         Player.update()
 
-        station.update()
+        station_instance.update()
         asteroid_group.update()
         for debris in debris_group:
             debris.update()
