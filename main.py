@@ -81,18 +81,24 @@ def draw_background():
     if main_menu_instance.menu_state == 0:
         screen.blit(image['background'], (0, 0))
 
-# sole purpose of this function is to move objects when the player is moving
-def move_objects(movementX, movementY):
+
+def move_objects(movement_x, movement_y):
+    """move objects when the player is moving"""
+
     for asteroid in asteroid_group:
-        x, y = asteroid.rect.center[0] + movementX, asteroid.rect.center[1] + movementY
-        asteroid.rect.center = (x, y)
+        asteroid.rect.center = (asteroid.rect.center[0] + movement_x,
+                                asteroid.rect.center[1] + movement_y)
 
     for debris in debris_group:
-        x, y = debris.rect.center[0] + movementX, debris.rect.center[1] + movementY
-        debris.rect.center = (x, y)
+        debris.rect.center = (debris.rect.center[0] + movement_x,
+                              debris.rect.center[1] + movement_y)
 
-    stationX, stationY = station_instance.rect.center[0] + movementX, station_instance.rect.center[1] + movementY
-    station_instance.rect.center = (stationX, stationY)
+    for laser in laser_group:
+        laser.rect.center = (laser.rect.center[0] + movement_x,
+                             laser.rect.center[1] + movement_y)
+
+    station_instance.rect.center = (station_instance.rect.center[0] + movement_x,
+                                    station_instance.rect.center[1] + movement_y)
 
     asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + movementX, asteroidSpawnerInstance.spawnY + movementY 
 
@@ -127,7 +133,7 @@ class Ship(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         # this sets starting position
-        self.rect.center = (SCREEN_WIDTH//2, SCREEN_HEIGHT//2)
+        self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
         # variables
         self.moving_up = False
@@ -140,8 +146,9 @@ class Ship(pygame.sprite.Sprite):
         self.action()
         self.moving()
 
-        if (self.moving_down or self.moving_up or self.moving_left or self.moving_right) and self.energy > 0 and not self.multiple_keys:
-            self.render_ship_animation() # this runs ship animation logic
+        if (
+                self.moving_down or self.moving_up or self.moving_left or self.moving_right) and self.energy > 0 and not self.multiple_keys:
+            self.render_ship_animation()  # this runs ship animation logic
 
         else:
             self.image = image['ship_0']  # this resets ship's frame to idle if it is not moving
@@ -153,37 +160,32 @@ class Ship(pygame.sprite.Sprite):
         energy_consumed = 0
         self.energy = round(self.energy, 2)
         movement_variable = round(self.speed * 0.75, 0)
-        
+
         if self.energy > 0 and not self.multiple_keys:
 
-            if self.moving_up: # and self.rect.top >= 10:
+            if self.moving_up:  # and self.rect.top >= 10:
                 # self.rect.y -= movement_variable
                 energy_consumed -= 1
                 move_objects(0, movement_variable)
 
-                
-            if self.moving_down: # and self.rect.bottom <= screen_height - 10:
+            if self.moving_down:  # and self.rect.bottom <= screen_height - 10:
                 # self.rect.y += movement_variable
                 energy_consumed -= 1
                 move_objects(0, -movement_variable)
 
-
-            if self.moving_left: # and self.rect.left >= 0:
+            if self.moving_left:  # and self.rect.left >= 0:
                 self.flip = True
                 self.direction = -1
                 # self.rect.x -= movement_variable
                 energy_consumed -= 1
                 move_objects(movement_variable, 0)
 
-
-
-            if self.moving_right: # and self.rect.right <= screen_width:
+            if self.moving_right:  # and self.rect.right <= screen_width:
                 self.flip = False
                 self.direction = 1
                 # self.rect.x += movement_variable
                 energy_consumed -= 1
                 move_objects(-movement_variable, 0)
-
 
         if (self.moving_down and self.moving_up) or (self.moving_left and self.moving_right):
             energy_consumed = 0
@@ -538,7 +540,6 @@ run = True
 while run:
 
     clock.tick(FPS)
-
 
     draw_background()
     # checks changed screen size
