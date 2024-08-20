@@ -8,7 +8,7 @@ from menu import main_menu
 
 # TODO: More stations
 # TODO: bigger/more maps??
-# TODO: update the UI and the world map
+# TODO: clean up the UI and the world map
 # * you can edit values where 'HERE' is written to suit your needs
 
 pygame.init()
@@ -42,7 +42,7 @@ font_small = pygame.font.SysFont('Futura', 30)
 font_big = pygame.font.SysFont('Futura', 80)
 
 
-# Saving/loading function
+# Saving/loading functions
 def saving():
     save_data = {
         'credits': Player.credits,
@@ -51,7 +51,7 @@ def saving():
     }
 
     with open("save.json", "w") as file:
-        json.dump(save_data, file)
+        json.dump(save_data, file, indent=4)
 
     print("GAME SAVED")
 
@@ -94,6 +94,8 @@ def move_objects(movementX, movementY):
     stationX, stationY = station_instance.rect.center[0] + movementX, station_instance.rect.center[1] + movementY
     station_instance.rect.center = (stationX, stationY)
 
+    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + movementX, asteroidSpawnerInstance.spawnY + movementY 
+
 
 class Ship(pygame.sprite.Sprite):
     def __init__(self, x, y, speed):
@@ -110,7 +112,7 @@ class Ship(pygame.sprite.Sprite):
         # initial credits
         self.credits = 10
         # storage
-        self.storage_max = 15  # adjust to change maximum storage
+        self.storage_max = 15  # HERE adjust to change maximum storage
         self.storage = 0
         # shooting
         self.cooldown = 30
@@ -245,7 +247,7 @@ class Ship(pygame.sprite.Sprite):
             self.storage = self.storage_max
 
         # shooting
-        if self.shooting and self.cooldown <= 0:
+        if self.shooting and self.cooldown <= 0 and self.energy > 0:
             laser = Laser(self.rect.centerx + (40 * self.direction), self.rect.centery, self.direction)
             laser_group.add(laser)
             Player.energy -= 1
@@ -301,7 +303,7 @@ class Station(pygame.sprite.Sprite):
         self.image = image['station']
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        self.range = pygame.Rect(0, 0, 300, 300)
+        self.range = pygame.Rect(0, 0, 500, 400) # HERE you can modify range of stations
         self.name = name
         # energy buy price
         self.energy_price = round(random.uniform(0.5, 2), 2)
@@ -337,7 +339,7 @@ class Station(pygame.sprite.Sprite):
             Player.credits += self.asteroid_price + Player.storage
             Player.storage = 0
 
-    # here, interaction and actions of station are handled
+    # interaction and actions of station are handled
     def action(self):
         self.range.center = self.rect.center
 
@@ -358,10 +360,52 @@ class Station(pygame.sprite.Sprite):
 
     def draw(self):
         screen.blit(self.image, self.rect)
+        # pygame.draw.rect(screen, RED, self.range, 3) debug line for station range
+
+
+class AsteroidSpawner():
+    def __init__(self):
+        self.spawnX = 500
+        self.spawnY = 120
+        self.spawn_width = 1020
+        self.spawn_height = 600
+
+    def spawn_location(self):
+        # select random spawn point
+        self.randomx = random.randint(self.spawnX, self.spawn_width)
+        self.randomy = random.randint(self.spawnY, self.spawn_height)
+
+    def determine_type(self):
+        choice = random.randint(1, 10)
+
+        if choice > 7:
+            rarity = "rare"
+            return rarity
+
+        else:
+            rarity = "common"
+            return rarity
+
+    def update(self):
+        # pygame.draw.rect(screen, RED, (self.spawnX, self.spawnY, self.spawn_width, self.spawn_height), 5) Debug to show asteroid spawn location
+        spawn_new = False
+        max_number_of_asteroids = 6  # HERE change to modify max number of asteroids
+        number_of_asteroids = len(asteroid_group)
+
+        # HERE you can change number of asteroids that need to be mined so new can be spawned
+        if number_of_asteroids < 4:
+            spawn_new = True
+
+        if spawn_new:
+            for i in range(number_of_asteroids, max_number_of_asteroids):
+                self.spawn_location()
+                rarity = self.determine_type()
+                asteroid = Asteroid(rarity, self.randomx, self.randomy)
+                asteroid_group.add(asteroid)
 
 
 class Asteroid(pygame.sprite.Sprite):
-    def __init__(self, rarity):
+    def __init__(self, rarity, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.type = rarity
         # determines what type of asteroid it should show and gives it properties
@@ -378,60 +422,23 @@ class Asteroid(pygame.sprite.Sprite):
             self.type = "common"
 
         self.rect = self.image.get_rect()
-        # select random spawn point
-        self.spawn_location()
+        self.rect.center = (x, y)
 
-    def spawn_location(self):
-        # select random spawn point
-        self.randomx = random.randint(500, screen_width - 60)
-        self.randomy = random.randint(120, screen_height - 200)
-        self.rect.center = (self.randomx, self.randomy)
-
-    def determine_type(self):
-        choice = random.randint(1, 10)
-
-        if choice > 7:
-            rarity = "rare"
-            return rarity
-
-        else:
-            rarity = "common"
-            return rarity
 
     def update(self):
         self.draw()
-        spawn_new = False
-        max_number_of_asteroids = 6  # HERE change to modify max number of asteroids
-        number_of_asteroids = len(asteroid_group)
-
-        # if self.rect.x >= screen_width:
-        #     self.kill()
 
         if self.health <= 0:
 
             if self.type == "common":  # add mined storage in case of a common asteroid
-                # Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
                 debris_instance = Debris(self.type, self.rect.center[0], self.rect.center[1])
                 debris_group.add(debris_instance)
                 self.kill()
 
             elif self.type == "rare":  # add in case of a rare asteroid
-                # Player.storage += 1.5 * round(random.uniform(1, 3), 2)
                 debris_instance = Debris(self.type, self.rect.center[0], self.rect.center[1])
                 debris_group.add(debris_instance)
                 self.kill()
-
-            # HERE you can change number of asteroids that need to be mined so new can be spawned
-        if number_of_asteroids < 4:
-            spawn_new = True
-
-        if spawn_new:
-            for i in range(number_of_asteroids, max_number_of_asteroids):
-                rarity = self.determine_type()
-                asteroid = Asteroid(rarity)
-                asteroid_group.add(asteroid)
-
-        # spawn_new = False
 
     def draw(self):
         screen.blit(self.image, self.rect)
@@ -463,7 +470,7 @@ class Debris(pygame.sprite.Sprite):
                 Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
 
     def draw(self):
-        screen.blit(self.image, self.rect.center)
+        screen.blit(self.image, self.rect)
 
 
 # button class
@@ -508,9 +515,10 @@ def get_screen_size():
 screen_width, screen_height = pygame.display.get_surface().get_size()
 # declare instances
 Player = Ship(200, 600, 10)
-station_instance = Station('Energy & Trade', 200, 400)
+station_instance = Station('Energy & Trade', 300, 415)
 # asteroid things
-asteroid = Asteroid("common")
+asteroidSpawnerInstance = AsteroidSpawner()
+asteroid = Asteroid("common", 487, 354)
 asteroid_group = pygame.sprite.Group(asteroid)
 # debris things
 debris_group = pygame.sprite.Group()
@@ -549,6 +557,7 @@ while run:
 
         Player.update()
 
+        asteroidSpawnerInstance.update()
         station_instance.update()
         asteroid_group.update()
         for debris in debris_group:
