@@ -100,11 +100,11 @@ def move_objects(movement_x, movement_y):
     station_instance.rect.center = (station_instance.rect.center[0] + movement_x,
                                     station_instance.rect.center[1] + movement_y)
 
-    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + movementX, asteroidSpawnerInstance.spawnY + movementY 
+    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + movement_x, asteroidSpawnerInstance.spawnY + movement_y 
 
 
 class Ship(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed):
+    def __init__(self, speed):
         pygame.sprite.Sprite.__init__(self)
         self.energy_stor = None
         self.flip = False
@@ -146,8 +146,7 @@ class Ship(pygame.sprite.Sprite):
         self.action()
         self.moving()
 
-        if (
-                self.moving_down or self.moving_up or self.moving_left or self.moving_right) and self.energy > 0 and not self.multiple_keys:
+        if (self.moving_down or self.moving_up or self.moving_left or self.moving_right) and self.energy > 0 and not self.multiple_keys:
             self.render_ship_animation()  # this runs ship animation logic
 
         else:
@@ -391,11 +390,11 @@ class AsteroidSpawner():
     def update(self):
         # pygame.draw.rect(screen, RED, (self.spawnX, self.spawnY, self.spawn_width, self.spawn_height), 5) Debug to show asteroid spawn location
         spawn_new = False
-        max_number_of_asteroids = 6  # HERE change to modify max number of asteroids
+        max_number_of_asteroids = 15  # HERE change to modify max number of asteroids
         number_of_asteroids = len(asteroid_group)
 
         # HERE you can change number of asteroids that need to be mined so new can be spawned
-        if number_of_asteroids < 4:
+        if number_of_asteroids < 8:
             spawn_new = True
 
         if spawn_new:
@@ -516,7 +515,7 @@ def get_screen_size():
 
 screen_width, screen_height = pygame.display.get_surface().get_size()
 # declare instances
-Player = Ship(200, 600, 10)
+Player = Ship(10)
 station_instance = Station('Energy & Trade', 300, 415)
 # asteroid things
 asteroidSpawnerInstance = AsteroidSpawner()
