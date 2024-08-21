@@ -1,6 +1,8 @@
 import json
+import math
 import random
 import load
+from fractions import Fraction
 
 import pygame
 
@@ -100,7 +102,7 @@ def move_objects(movement_x, movement_y):
     station_instance.rect.center = (station_instance.rect.center[0] + movement_x,
                                     station_instance.rect.center[1] + movement_y)
 
-    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + movement_x, asteroidSpawnerInstance.spawnY + movement_y 
+    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + movement_x, asteroidSpawnerInstance.spawnY + movement_y
 
 
 class Ship(pygame.sprite.Sprite):
@@ -109,7 +111,6 @@ class Ship(pygame.sprite.Sprite):
         self.energy_stor = None
         self.flip = False
         self.speed = speed
-        self.direction = 1
         # energy things and rectangles
         self.energy_full = 100
         self.energy = 100
@@ -173,15 +174,13 @@ class Ship(pygame.sprite.Sprite):
                 move_objects(0, -movement_variable)
 
             if self.moving_left:  # and self.rect.left >= 0:
-                self.flip = True
-                self.direction = -1
+                # self.flip = True
                 # self.rect.x -= movement_variable
                 energy_consumed -= 1
                 move_objects(movement_variable, 0)
 
             if self.moving_right:  # and self.rect.right <= screen_width:
-                self.flip = False
-                self.direction = 1
+                # self.flip = False
                 # self.rect.x += movement_variable
                 energy_consumed -= 1
                 move_objects(-movement_variable, 0)
@@ -247,9 +246,16 @@ class Ship(pygame.sprite.Sprite):
         if self.storage > self.storage_max:
             self.storage = self.storage_max
 
-        # shooting
         if self.shooting and self.cooldown <= 0 and self.energy > 0:
-            laser = Laser(self.rect.centerx + (40 * self.direction), self.rect.centery, self.direction)
+            # Spawns a laser sprite in the direction the ship is facing
+
+            spawn_dist_from_player = 40
+            dir_vector = self.get_mouse_vector()
+            t = spawn_dist_from_player / math.sqrt(dir_vector[0] ** 2 + dir_vector[1] ** 2)
+            parametric_equation_x = self.rect.centerx + (t * dir_vector[0])
+            parametric_equation_y = self.rect.centery + (t * dir_vector[1])
+
+            laser = Laser(parametric_equation_x, parametric_equation_y, dir_vector)
             laser_group.add(laser)
             Player.energy -= 1
             self.cooldown = 30
@@ -267,12 +273,56 @@ class Ship(pygame.sprite.Sprite):
             if self.index > 1:
                 self.index = 0
 
+    def get_mouse_vector(self):
+        """Returns a reduced direction vector of the line between the cursor and player position"""
+        mouse_pos = pygame.mouse.get_pos()
+        player_pos = self.rect.center
+
+        x_component = mouse_pos[0] - player_pos[0]
+        y_component = mouse_pos[1] - player_pos[1]
+
+        if x_component != 0 and y_component != 0:
+            reduced_fraction = Fraction(x_component, y_component)
+            if (x_component < 0 and y_component < 0) or (x_component > 0 > y_component):
+                x_component = reduced_fraction.numerator * -1
+                y_component = reduced_fraction.denominator * -1
+
+        return [x_component, y_component]
+
+    def determine_direction(self):
+        """Determines the ship direction in degrees based on the cursor position and returns a rotated image"""
+        mouse_pos = pygame.mouse.get_pos()
+        adjacent = mouse_pos[0] - self.rect.centerx
+        opposite = self.rect.centery - mouse_pos[1]
+
+        if adjacent == 0 and opposite >= 0:
+            radian_angle = math.pi / 2
+        elif adjacent == 0 and opposite < 0:
+            radian_angle = (3 * math.pi) / 2
+        elif adjacent > 0 and opposite >= 0:
+            radian_angle = math.atan(opposite / adjacent)
+        elif adjacent > 0 >= opposite:
+            radian_angle = 2 * math.pi - abs(math.atan(opposite / adjacent))
+        elif adjacent < 0 and opposite <= 0:
+            radian_angle = math.pi + math.atan(opposite / adjacent)
+        elif adjacent < 0 <= opposite:
+            radian_angle = math.pi - abs(math.atan(opposite / adjacent))
+        else:
+            radian_angle = 0
+
+        angle = math.degrees(radian_angle)
+
+        return pygame.transform.rotate(self.image, angle)
+
     def draw_ship(self):
-        screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+        rotated_ship = self.determine_direction()
+        ship_rect = rotated_ship.get_rect(center=self.rect.center)
+
+        screen.blit(rotated_ship, ship_rect)
 
 
 class Laser(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction):
+    def __init__(self, x, y, direction: list):
         pygame.sprite.Sprite.__init__(self)
         self.image = image['laser']
         self.rect = self.image.get_rect()
@@ -283,8 +333,11 @@ class Laser(pygame.sprite.Sprite):
     def update(self):
         self.draw()
         screen_width = pygame.display.get_surface().get_size()[0]
+
         # move laser
-        self.rect.x += (self.speed * self.direction)
+        t = self.speed / math.sqrt(self.direction[0] ** 2 + self.direction[1] ** 2)
+        self.rect.centerx += t * self.direction[0]
+        self.rect.centery += t * self.direction[1]
 
         if self.rect.left >= screen_width or self.rect.right < 0:
             self.kill()
