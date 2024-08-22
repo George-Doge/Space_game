@@ -7,6 +7,7 @@ def game_images():
     image: dict = {}
     try:
         image['background'] = pygame.image.load('images/background/space3.jpeg').convert_alpha()
+
         image['ship_0'] = pygame.image.load('images/sprites/ship/ship-state0.png').convert_alpha()
         image['ship_0'] = pygame.transform.rotate(image['ship_0'], 270)
 

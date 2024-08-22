@@ -111,6 +111,7 @@ class Ship(pygame.sprite.Sprite):
         self.energy_stor = None
         self.flip = False
         self.speed = speed
+        self.angle = 0
         # energy things and rectangles
         self.energy_full = 100
         self.energy = 100
@@ -163,25 +164,19 @@ class Ship(pygame.sprite.Sprite):
 
         if self.energy > 0 and not self.multiple_keys:
 
-            if self.moving_up:  # and self.rect.top >= 10:
-                # self.rect.y -= movement_variable
+            if self.moving_up:
                 energy_consumed -= 1
                 move_objects(0, movement_variable)
 
-            if self.moving_down:  # and self.rect.bottom <= screen_height - 10:
-                # self.rect.y += movement_variable
+            if self.moving_down:
                 energy_consumed -= 1
                 move_objects(0, -movement_variable)
 
-            if self.moving_left:  # and self.rect.left >= 0:
-                # self.flip = True
-                # self.rect.x -= movement_variable
+            if self.moving_left:
                 energy_consumed -= 1
                 move_objects(movement_variable, 0)
 
-            if self.moving_right:  # and self.rect.right <= screen_width:
-                # self.flip = False
-                # self.rect.x += movement_variable
+            if self.moving_right:
                 energy_consumed -= 1
                 move_objects(-movement_variable, 0)
 
@@ -255,7 +250,7 @@ class Ship(pygame.sprite.Sprite):
             parametric_equation_x = self.rect.centerx + (t * dir_vector[0])
             parametric_equation_y = self.rect.centery + (t * dir_vector[1])
 
-            laser = Laser(parametric_equation_x, parametric_equation_y, dir_vector)
+            laser = Laser(parametric_equation_x, parametric_equation_y, dir_vector, self.angle)
             laser_group.add(laser)
             Player.energy -= 1
             self.cooldown = 30
@@ -310,9 +305,9 @@ class Ship(pygame.sprite.Sprite):
         else:
             radian_angle = 0
 
-        angle = math.degrees(radian_angle)
+        self.angle = math.degrees(radian_angle)
 
-        return pygame.transform.rotate(self.image, angle)
+        return pygame.transform.rotate(self.image, self.angle)
 
     def draw_ship(self):
         rotated_ship = self.determine_direction()
@@ -322,10 +317,10 @@ class Ship(pygame.sprite.Sprite):
 
 
 class Laser(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction: list):
+    def __init__(self, x, y, direction: list, angle: int):
         pygame.sprite.Sprite.__init__(self)
-        self.image = image['laser']
-        self.rect = self.image.get_rect()
+        self.image = pygame.transform.rotate(image['laser'], angle)
+        self.rect = self.image.get_rect( )
         self.rect.center = (x, y)
         self.direction = direction
         self.speed = 10
