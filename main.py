@@ -1,6 +1,8 @@
 import json
+import math
 import random
 import load
+from fractions import Fraction
 
 import pygame
 
@@ -8,6 +10,7 @@ from menu import main_menu
 
 # TODO: More stations
 # TODO: bigger/more maps??
+# TODO: clean up the UI and the world map
 # * you can edit values where 'HERE' is written to suit your needs
 
 pygame.init()
@@ -17,7 +20,7 @@ SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 
-pygame.display.set_caption("Space game v0.2.4.3")
+pygame.display.set_caption("Space game v0.2.5")
 
 # Load images
 image = load.game_images()
@@ -41,7 +44,7 @@ font_small = pygame.font.SysFont('Futura', 30)
 font_big = pygame.font.SysFont('Futura', 80)
 
 
-# Saving/loading function
+# Saving/loading functions
 def saving():
     save_data = {
         'credits': Player.credits,
@@ -50,7 +53,7 @@ def saving():
     }
 
     with open("save.json", "w") as file:
-        json.dump(save_data, file)
+        json.dump(save_data, file, indent=4)
 
     print("GAME SAVED")
 
@@ -81,13 +84,33 @@ def draw_background():
         screen.blit(image['background'], (0, 0))
 
 
+def move_objects(movement_x, movement_y):
+    """move objects when the player is moving"""
+
+    for asteroid in asteroid_group:
+        asteroid.rect.center = (asteroid.rect.center[0] + movement_x,
+                                asteroid.rect.center[1] + movement_y)
+
+    for debris in debris_group:
+        debris.rect.center = (debris.rect.center[0] + movement_x,
+                              debris.rect.center[1] + movement_y)
+
+    for laser in laser_group:
+        laser.rect.center = (laser.rect.center[0] + movement_x,
+                             laser.rect.center[1] + movement_y)
+
+    station_instance.rect.center = (station_instance.rect.center[0] + movement_x,
+                                    station_instance.rect.center[1] + movement_y)
+
+    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + movement_x, asteroidSpawnerInstance.spawnY + movement_y
+
+
 class Ship(pygame.sprite.Sprite):
-    def __init__(self, x, y, speed):
+    def __init__(self, speed):
         pygame.sprite.Sprite.__init__(self)
         self.energy_stor = None
         self.flip = False
         self.speed = speed
-        self.direction = 1
         # energy things and rectangles
         self.energy_full = 100
         self.energy = 100
@@ -96,7 +119,7 @@ class Ship(pygame.sprite.Sprite):
         # initial credits
         self.credits = 10
         # storage
-        self.storage_max = 15  # adjust to change maximum storage
+        self.storage_max = 15  # HERE adjust to change maximum storage
         self.storage = 0
         # shooting
         self.cooldown = 30
@@ -111,7 +134,7 @@ class Ship(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         # this sets starting position
-        self.rect.center = (x, y)
+        self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
         # variables
         self.moving_up = False
@@ -125,7 +148,7 @@ class Ship(pygame.sprite.Sprite):
         self.moving()
 
         if (self.moving_down or self.moving_up or self.moving_left or self.moving_right) and self.energy > 0 and not self.multiple_keys:
-            self.render_ship_animation() # this runs ship animation logic
+            self.render_ship_animation()  # this runs ship animation logic
 
         else:
             self.image = image['ship_0']  # this resets ship's frame to idle if it is not moving
@@ -136,33 +159,31 @@ class Ship(pygame.sprite.Sprite):
 
         energy_consumed = 0
         self.energy = round(self.energy, 2)
+        movement_variable = round(self.speed * 0.75, 0)
 
         if self.energy > 0 and not self.multiple_keys:
 
-            if self.moving_up and self.rect.top >= 10:
-                self.rect.y -= self.speed * 0.75
+            if self.moving_up:  # and self.rect.top >= 10:
+                # self.rect.y -= movement_variable
                 energy_consumed -= 1
+                move_objects(0, movement_variable)
 
-            if self.moving_down and self.rect.bottom <= screen_height - 10:
-                self.rect.y += self.speed * 0.75
+            if self.moving_down:  # and self.rect.bottom <= screen_height - 10:
+                # self.rect.y += movement_variable
                 energy_consumed -= 1
+                move_objects(0, -movement_variable)
 
-            if self.moving_left and self.rect.left >= 0:
-
-
-                self.flip = True
-                self.direction = -1
-                self.rect.x -= self.speed * 0.75
+            if self.moving_left:  # and self.rect.left >= 0:
+                # self.flip = True
+                # self.rect.x -= movement_variable
                 energy_consumed -= 1
+                move_objects(movement_variable, 0)
 
-
-            if self.moving_right and self.rect.right <= screen_width:
-
-
-                self.flip = False
-                self.direction = 1
-                self.rect.x += self.speed * 0.75
+            if self.moving_right:  # and self.rect.right <= screen_width:
+                # self.flip = False
+                # self.rect.x += movement_variable
                 energy_consumed -= 1
+                move_objects(-movement_variable, 0)
 
         if (self.moving_down and self.moving_up) or (self.moving_left and self.moving_right):
             energy_consumed = 0
@@ -225,9 +246,16 @@ class Ship(pygame.sprite.Sprite):
         if self.storage > self.storage_max:
             self.storage = self.storage_max
 
-        # shooting
-        if self.shooting and self.cooldown <= 0:
-            laser = Laser(self.rect.centerx + (40 * self.direction), self.rect.centery, self.direction)
+        if self.shooting and self.cooldown <= 0 and self.energy > 0:
+            # Spawns a laser sprite in the direction the ship is facing
+
+            spawn_dist_from_player = 40
+            dir_vector = self.get_mouse_vector()
+            t = spawn_dist_from_player / math.sqrt(dir_vector[0] ** 2 + dir_vector[1] ** 2)
+            parametric_equation_x = self.rect.centerx + (t * dir_vector[0])
+            parametric_equation_y = self.rect.centery + (t * dir_vector[1])
+
+            laser = Laser(parametric_equation_x, parametric_equation_y, dir_vector)
             laser_group.add(laser)
             Player.energy -= 1
             self.cooldown = 30
@@ -245,12 +273,56 @@ class Ship(pygame.sprite.Sprite):
             if self.index > 1:
                 self.index = 0
 
+    def get_mouse_vector(self):
+        """Returns a reduced direction vector of the line between the cursor and player position"""
+        mouse_pos = pygame.mouse.get_pos()
+        player_pos = self.rect.center
+
+        x_component = mouse_pos[0] - player_pos[0]
+        y_component = mouse_pos[1] - player_pos[1]
+
+        if x_component != 0 and y_component != 0:
+            reduced_fraction = Fraction(x_component, y_component)
+            if (x_component < 0 and y_component < 0) or (x_component > 0 > y_component):
+                x_component = reduced_fraction.numerator * -1
+                y_component = reduced_fraction.denominator * -1
+
+        return [x_component, y_component]
+
+    def determine_direction(self):
+        """Determines the ship direction in degrees based on the cursor position and returns a rotated image"""
+        mouse_pos = pygame.mouse.get_pos()
+        adjacent = mouse_pos[0] - self.rect.centerx
+        opposite = self.rect.centery - mouse_pos[1]
+
+        if adjacent == 0 and opposite >= 0:
+            radian_angle = math.pi / 2
+        elif adjacent == 0 and opposite < 0:
+            radian_angle = (3 * math.pi) / 2
+        elif adjacent > 0 and opposite >= 0:
+            radian_angle = math.atan(opposite / adjacent)
+        elif adjacent > 0 >= opposite:
+            radian_angle = 2 * math.pi - abs(math.atan(opposite / adjacent))
+        elif adjacent < 0 and opposite <= 0:
+            radian_angle = math.pi + math.atan(opposite / adjacent)
+        elif adjacent < 0 <= opposite:
+            radian_angle = math.pi - abs(math.atan(opposite / adjacent))
+        else:
+            radian_angle = 0
+
+        angle = math.degrees(radian_angle)
+
+        return pygame.transform.rotate(self.image, angle)
+
     def draw_ship(self):
-        screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+        rotated_ship = self.determine_direction()
+        ship_rect = rotated_ship.get_rect(center=self.rect.center)
+
+        screen.blit(rotated_ship, ship_rect)
 
 
 class Laser(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction):
+    def __init__(self, x, y, direction: list):
         pygame.sprite.Sprite.__init__(self)
         self.image = image['laser']
         self.rect = self.image.get_rect()
@@ -261,8 +333,11 @@ class Laser(pygame.sprite.Sprite):
     def update(self):
         self.draw()
         screen_width = pygame.display.get_surface().get_size()[0]
+
         # move laser
-        self.rect.x += (self.speed * self.direction)
+        t = self.speed / math.sqrt(self.direction[0] ** 2 + self.direction[1] ** 2)
+        self.rect.centerx += t * self.direction[0]
+        self.rect.centery += t * self.direction[1]
 
         if self.rect.left >= screen_width or self.rect.right < 0:
             self.kill()
@@ -282,7 +357,7 @@ class Station(pygame.sprite.Sprite):
         self.image = image['station']
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        self.range = pygame.Rect(0, 0, 300, 300)
+        self.range = pygame.Rect(0, 0, 500, 400) # HERE you can modify range of stations
         self.name = name
         # energy buy price
         self.energy_price = round(random.uniform(0.5, 2), 2)
@@ -318,7 +393,7 @@ class Station(pygame.sprite.Sprite):
             Player.credits += self.asteroid_price + Player.storage
             Player.storage = 0
 
-    # here, interaction and actions of station are handled
+    # interaction and actions of station are handled
     def action(self):
         self.range.center = self.rect.center
 
@@ -339,10 +414,52 @@ class Station(pygame.sprite.Sprite):
 
     def draw(self):
         screen.blit(self.image, self.rect)
+        # pygame.draw.rect(screen, RED, self.range, 3) debug line for station range
+
+
+class AsteroidSpawner():
+    def __init__(self):
+        self.spawnX = 500
+        self.spawnY = 120
+        self.spawn_width = 1020
+        self.spawn_height = 600
+
+    def spawn_location(self):
+        # select random spawn point
+        self.randomx = random.randint(self.spawnX, self.spawnX + self.spawn_width)
+        self.randomy = random.randint(self.spawnY, self.spawnY + self.spawn_height)
+
+    def determine_type(self):
+        choice = random.randint(1, 10)
+
+        if choice > 7:
+            rarity = "rare"
+            return rarity
+
+        else:
+            rarity = "common"
+            return rarity
+
+    def update(self):
+        # pygame.draw.rect(screen, RED, (self.spawnX, self.spawnY, self.spawn_width, self.spawn_height), 5) # Debug to show asteroid spawn location
+        spawn_new = False
+        max_number_of_asteroids = 13  # HERE change to modify max number of asteroids
+        number_of_asteroids = len(asteroid_group)
+
+        # HERE you can change number of asteroids that need to be mined so new can be spawned
+        if number_of_asteroids < 8:
+            spawn_new = True
+
+        if spawn_new:
+            for i in range(number_of_asteroids, max_number_of_asteroids):
+                self.spawn_location()
+                rarity = self.determine_type()
+                asteroid = Asteroid(rarity, self.randomx, self.randomy)
+                asteroid_group.add(asteroid)
 
 
 class Asteroid(pygame.sprite.Sprite):
-    def __init__(self, rarity):
+    def __init__(self, rarity, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.type = rarity
         # determines what type of asteroid it should show and gives it properties
@@ -359,60 +476,23 @@ class Asteroid(pygame.sprite.Sprite):
             self.type = "common"
 
         self.rect = self.image.get_rect()
-        # select random spawn point
-        self.spawn_location()
+        self.rect.center = (x, y)
 
-    def spawn_location(self):
-        # select random spawn point
-        self.randomx = random.randint(500, screen_width - 60)
-        self.randomy = random.randint(120, screen_height - 200)
-        self.rect.center = (self.randomx, self.randomy)
-
-    def determine_type(self):
-        choice = random.randint(1, 10)
-
-        if choice > 7:
-            rarity = "rare"
-            return rarity
-
-        else:
-            rarity = "common"
-            return rarity
 
     def update(self):
         self.draw()
-        spawn_new = False
-        max_number_of_asteroids = 6  # HERE change to modify max number of asteroids
-        number_of_asteroids = len(asteroid_group)
-
-        if self.rect.x >= screen_width:
-            self.kill()
 
         if self.health <= 0:
 
             if self.type == "common":  # add mined storage in case of a common asteroid
-                # Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
-                debris_instance = Debris(self.type, self.randomx, self.randomy)
+                debris_instance = Debris(self.type, self.rect.center[0], self.rect.center[1])
                 debris_group.add(debris_instance)
                 self.kill()
 
             elif self.type == "rare":  # add in case of a rare asteroid
-                # Player.storage += 1.5 * round(random.uniform(1, 3), 2)
-                debris_instance = Debris(self.type, self.randomx, self.randomy)
+                debris_instance = Debris(self.type, self.rect.center[0], self.rect.center[1])
                 debris_group.add(debris_instance)
                 self.kill()
-
-            # HERE you can change number of asteroids that need to be mined so new can be spawned
-        if number_of_asteroids < 4:
-            spawn_new = True
-
-        if spawn_new:
-            for i in range(number_of_asteroids, max_number_of_asteroids):
-                rarity = self.determine_type()
-                asteroid = Asteroid(rarity)
-                asteroid_group.add(asteroid)
-
-        # spawn_new = False
 
     def draw(self):
         screen.blit(self.image, self.rect)
@@ -488,10 +568,11 @@ def get_screen_size():
 
 screen_width, screen_height = pygame.display.get_surface().get_size()
 # declare instances
-Player = Ship(200, 600, 10)
-station = Station('Energy & Trade', 200, 400)
+Player = Ship(10)
+station_instance = Station('Energy & Trade', 300, 415)
 # asteroid things
-asteroid = Asteroid("common")
+asteroidSpawnerInstance = AsteroidSpawner()
+asteroid = Asteroid("common", 487, 354)
 asteroid_group = pygame.sprite.Group(asteroid)
 # debris things
 debris_group = pygame.sprite.Group()
@@ -512,7 +593,6 @@ while run:
 
     clock.tick(FPS)
 
-
     draw_background()
     # checks changed screen size
     screen_width, screen_height = pygame.display.get_surface().get_size()
@@ -530,7 +610,8 @@ while run:
 
         Player.update()
 
-        station.update()
+        asteroidSpawnerInstance.update()
+        station_instance.update()
         asteroid_group.update()
         for debris in debris_group:
             debris.update()

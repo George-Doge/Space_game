@@ -1,5 +1,5 @@
 """
-MAIN MENU implementation explanation
+MAIN MENU implementation file
 """
 import pygame
 

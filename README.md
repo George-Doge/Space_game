@@ -13,10 +13,17 @@ Running this game in the default window size (1080x864) or in fullscreen is reco
 > ![Folder structure image](/README_images/location.png "images directory and an executable in same directory")
 
 ---
-## VERSION 0.2.4.3
+## VERSION 0.2.5
 - [x] MINING & SELLING
 - [x] SAVE & LOAD
 - [X] MORE ASTEROID TYPES
 - [X] START/PAUSE MENU
 - [ ] CLEAN UP THE CODE
 - [ ] ADDITIONAL THINGS??
+
+
+### Changelog in 0.2.5
+- Added changelog
+- Camera is now centered on the player ship 
+- Player can move freely around the map (for now there is only cold space around the station)
+- Added Player rotation
