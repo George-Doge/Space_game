@@ -26,3 +26,4 @@ Running this game in the default window size (1080x864) or in fullscreen is reco
 - Added changelog
 - Camera is now centered on the player ship 
 - Player can move freely around the map (for now there is only cold space around the station)
+- Added Player rotation
