@@ -11,4 +11,6 @@
 
 - [Space background](http://wallpapercave.com/wp/tlxFHZF.jpg)
 - [Asteroid Belt](https://wallpapercave.com/wp/wp4221867.jpg)
+- [Black Hole](https://www.reddit.com/r/PixelArt/comments/a4fp0e/supermassive_black_hole/)
+- [Space with Earth](https://www.peakpx.com/en/hd-wallpaper-desktop-wplat)
 - [Menu buttons](https://nectanebo.itch.io/menu-buttons) by [nectanebo](https://nectanebo.itch.io/)
