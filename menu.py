@@ -111,10 +111,12 @@ class main_menu():
 
     def controls_scene(self):
         screen.blit(image['main_background'], (0, 0))
+        pygame.draw.rect(screen, BLACK, (self.screen_width//2 - 220, 110, 460 , 130))
         draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
         draw_text('CONTROLS', font1, WHITE, self.screen_width//2 - 200, 110)
-        draw_text('Arrow keys - movement, SPACEBAR - shoot', font1, WHITE, self.screen_width//2 - 200, 140)
-        draw_text('ESC - pause/main menu, S - save, L - load', font1, WHITE, self.screen_width//2 - 200, 170)
+        draw_text('WASD - movement, Mouse - direction', font1, WHITE, self.screen_width//2 - 200, 140)
+        draw_text('SPACEBAR - shoot', font1, WHITE, self.screen_width//2 - 200, 170)
+        draw_text('ESC - pause/main menu, F5 - save, F9 - load', font1, WHITE, self.screen_width//2 - 200, 200)
 
         if self.XButton.action():
             self.menu_state = 1
@@ -127,7 +129,7 @@ class main_menu():
         # changes position for fulscreen mode
         if self.screen_width > SCREEN_WIDTH:
             draw_text('SPACE GAME', font2, WHITE, self.screen_width//2 - 200, 20)
-            pygame.draw.rect(screen, BLACK, (self.screen_width//4, 110, 1000, 570))
+            pygame.draw.rect(screen, BLACK, (self.screen_width//4, 110, 1000, 650))
             y_offset = 120  # Starting y position for text
             for line in credits_lines:
                 draw_text(line, font1, WHITE, self.screen_width//4 + 10, y_offset)
@@ -135,7 +137,7 @@ class main_menu():
         # default windowed resolution
         else:
             draw_text('SPACE GAME', font2, WHITE, SCREEN_WIDTH//2 - 200, 20)
-            pygame.draw.rect(screen, BLACK, (20, 110, 1040, 570))
+            pygame.draw.rect(screen, BLACK, (20, 110, 1040, 650))
             y_offset = 120  # Starting y position for text
             for line in credits_lines:
                 draw_text(line, font1, WHITE, 30, y_offset)

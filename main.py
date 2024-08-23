@@ -84,25 +84,25 @@ def draw_background():
         screen.blit(image['background'], (0, 0))
 
 
-def move_objects(movement_x, movement_y):
+def move_objects(movement_x, movement_y, t):
     """move objects when the player is moving"""
 
     for asteroid in asteroid_group:
-        asteroid.rect.center = (asteroid.rect.center[0] + movement_x,
-                                asteroid.rect.center[1] + movement_y)
+        asteroid.rect.center = (asteroid.rect.centerx + t*movement_x,
+                                asteroid.rect.centery + t*movement_y)
 
     for debris in debris_group:
-        debris.rect.center = (debris.rect.center[0] + movement_x,
-                              debris.rect.center[1] + movement_y)
+        debris.rect.center = (debris.rect.centerx + t*movement_x,
+                              debris.rect.centery + t*movement_y)
 
     for laser in laser_group:
-        laser.rect.center = (laser.rect.center[0] + movement_x,
-                             laser.rect.center[1] + movement_y)
+        laser.rect.center = (laser.rect.centerx + t*movement_x,
+                             laser.rect.centery + t*movement_y)
 
-    station_instance.rect.center = (station_instance.rect.center[0] + movement_x,
-                                    station_instance.rect.center[1] + movement_y)
+    station_instance.rect.center = (station_instance.rect.centerx + t*movement_x,
+                                    station_instance.rect.centery + t*movement_y)
 
-    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + movement_x, asteroidSpawnerInstance.spawnY + movement_y
+    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + t*movement_x, asteroidSpawnerInstance.spawnY + t*movement_y
 
 
 class Ship(pygame.sprite.Sprite):
@@ -138,17 +138,17 @@ class Ship(pygame.sprite.Sprite):
         self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
         # variables
-        self.moving_up = False
-        self.moving_down = False
-        self.moving_left = False
-        self.moving_right = False
+        self.moving_w = False
+        self.moving_s = False
+        self.moving_a = False
+        self.moving_d = False
         self.shooting = False
 
     def update(self):
         self.action()
         self.moving()
 
-        if (self.moving_down or self.moving_up or self.moving_left or self.moving_right) and self.energy > 0 and not self.multiple_keys:
+        if (self.moving_s or self.moving_w or self.moving_a or self.moving_d) and self.energy > 0 and not self.multiple_keys:
             self.render_ship_animation()  # this runs ship animation logic
 
         else:
@@ -160,27 +160,30 @@ class Ship(pygame.sprite.Sprite):
 
         energy_consumed = 0
         self.energy = round(self.energy, 2)
+        # movement variable is calculated (and rounded down to prevent floating position coords), and then used to move objects
         movement_variable = round(self.speed * 0.75, 0)
 
         if self.energy > 0 and not self.multiple_keys:
+            direction_vector = self.get_mouse_vector()
+            t = movement_variable / math.sqrt(direction_vector[0] ** 2 + direction_vector[1] ** 2)
 
-            if self.moving_up:
+            if self.moving_w:
                 energy_consumed -= 1
-                move_objects(0, movement_variable)
+                move_objects(-direction_vector[0], -direction_vector[1], t)
 
-            if self.moving_down:
+            if self.moving_s:
                 energy_consumed -= 1
-                move_objects(0, -movement_variable)
+                move_objects(direction_vector[0], direction_vector[1], t)
 
-            if self.moving_left:
+            if self.moving_a:
                 energy_consumed -= 1
-                move_objects(movement_variable, 0)
+                move_objects(-direction_vector[1], 0, t)
 
-            if self.moving_right:
+            if self.moving_d:
                 energy_consumed -= 1
-                move_objects(-movement_variable, 0)
+                move_objects(direction_vector[1], 0, t)
 
-        if (self.moving_down and self.moving_up) or (self.moving_left and self.moving_right):
+        if (self.moving_s and self.moving_w) or (self.moving_a and self.moving_d):
             energy_consumed = 0
             self.multiple_keys = True
 
@@ -194,10 +197,10 @@ class Ship(pygame.sprite.Sprite):
     def action(self):
         # check for low or max energy
         if self.energy <= self.energy_full * 0.3 and not self.energy <= 0:
-            draw_text('WARNING, LOW ENERGY', font_small, RED, 70, 700)
+            draw_text('WARNING, LOW ENERGY', font_small, RED, 25, 105)
 
         elif self.energy <= 0:
-            draw_text('NO ENERGY', font_small, RED, 70, 700)
+            draw_text('NO ENERGY', font_small, RED, 25, 105)
 
         if self.energy > self.energy_full:
             self.energy = self.energy_full
@@ -230,10 +233,10 @@ class Ship(pygame.sprite.Sprite):
         screen.blit(image['storage_bar'], (500, 50))
 
         if self.storage >= self.storage_max * 0.75 and not self.storage == self.storage_max:
-            draw_text(f'Reaching maximum capacity', font_small, RED, 500, 700)
+            draw_text(f'Reaching maximum capacity', font_small, RED, 500, 105)
 
         elif self.storage >= self.storage_max:
-            draw_text(f'Maximum cargo capacity reached', font_small, RED, 500, 700)
+            draw_text(f'Maximum cargo capacity reached', font_small, RED, 500, 105)
 
         if self.storage < 0:
             self.storage = 0
@@ -310,6 +313,8 @@ class Ship(pygame.sprite.Sprite):
         return pygame.transform.rotate(self.image, self.angle)
 
     def draw_ship(self):
+        self.rect.center = (screen_width//2, screen_height//2)
+        self.rect.center = (screen_width//2, screen_height//2)
         rotated_ship = self.determine_direction()
         ship_rect = rotated_ship.get_rect(center=self.rect.center)
 
@@ -636,42 +641,42 @@ while run:
                 main_menu_instance.menu_state = 1
 
             # ship movement
-            if event.key == pygame.K_UP:
-                Player.moving_up = True
+            if event.key == pygame.K_w:
+                Player.moving_w = True
 
-            if event.key == pygame.K_DOWN:
-                Player.moving_down = True
+            if event.key == pygame.K_s:
+                Player.moving_s = True
 
-            if event.key == pygame.K_LEFT:
-                Player.moving_left = True
+            if event.key == pygame.K_a:
+                Player.moving_a = True
 
-            if event.key == pygame.K_RIGHT:
-                Player.moving_right = True
+            if event.key == pygame.K_d:
+                Player.moving_d = True
 
             if event.key == pygame.K_SPACE:
                 Player.shooting = True
 
             # saving and loading
-            if event.key == pygame.K_s and main_menu_instance.menu_state == 0:
+            if event.key == pygame.K_F5 and main_menu_instance.menu_state == 0:
                 # check if the game is running, so player can't load/save when paused
                 saving()
 
-            if event.key == pygame.K_l and main_menu_instance.menu_state == 0:
+            if event.key == pygame.K_F9 and main_menu_instance.menu_state == 0:
                 loading()
 
         if event.type == pygame.KEYUP:
             # ship movement
-            if event.key == pygame.K_UP:
-                Player.moving_up = False
+            if event.key == pygame.K_w:
+                Player.moving_w = False
 
-            if event.key == pygame.K_DOWN:
-                Player.moving_down = False
+            if event.key == pygame.K_s:
+                Player.moving_s = False
 
-            if event.key == pygame.K_LEFT:
-                Player.moving_left = False
+            if event.key == pygame.K_a:
+                Player.moving_a = False
 
-            if event.key == pygame.K_RIGHT:
-                Player.moving_right = False
+            if event.key == pygame.K_d:
+                Player.moving_d = False
 
             if event.key == pygame.K_SPACE:
                 Player.shooting = False
