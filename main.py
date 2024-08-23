@@ -110,11 +110,14 @@ class Ship(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.energy_stor = None
         self.flip = False
-        self.speed = speed
+        self.max_speed = speed
+        self.speed = 0
+        self.inertia_factor = 0.02
         self.angle = 0
+        self.moving_direction = []  # dir_vector
         # energy things and rectangles
-        self.energy_full = 100
-        self.energy = 100
+        self.energy_full = 10000
+        self.energy = 10000
         self.energy_max = pygame.Rect(70, 650, 100, 40)
         self.multiple_keys = False
         # initial credits
@@ -148,11 +151,23 @@ class Ship(pygame.sprite.Sprite):
         self.action()
         self.moving()
 
-        if (self.moving_s or self.moving_w or self.moving_a or self.moving_d) and self.energy > 0 and not self.multiple_keys:
-            self.render_ship_animation()  # this runs ship animation logic
+        # print(f'Current speed: {self.speed}\n\n')
 
+        if (
+                self.moving_s or self.moving_w or self.moving_a or self.moving_d) and self.energy > 0 and not self.multiple_keys:
+            self.render_ship_animation()  # this runs ship animation logic
+            if self.speed < self.max_speed:
+                self.speed += self.max_speed * self.inertia_factor
+            else:
+                self.speed = self.max_speed
         else:
             self.image = image['ship_0']  # this resets ship's frame to idle if it is not moving
+            if self.speed > 0:
+                self.speed -= self.max_speed * self.inertia_factor
+                t = self.speed / math.sqrt(self.moving_direction[0] ** 2 + self.moving_direction[1] ** 2)
+                move_objects(*self.moving_direction, t)
+            else:
+                self.speed = 0
 
         self.draw_ship()
 
@@ -170,18 +185,22 @@ class Ship(pygame.sprite.Sprite):
             if self.moving_w:
                 energy_consumed -= 1
                 move_objects(-direction_vector[0], -direction_vector[1], t)
+                self.moving_direction = [-direction_vector[0], -direction_vector[1]]
 
             if self.moving_s:
                 energy_consumed -= 1
                 move_objects(direction_vector[0], direction_vector[1], t)
+                self.moving_direction = [direction_vector[0], direction_vector[1]]
 
             if self.moving_a:
                 energy_consumed -= 1
                 move_objects(-direction_vector[1], 0, t)
+                self.moving_direction = [-direction_vector[0], 0]
 
             if self.moving_d:
                 energy_consumed -= 1
                 move_objects(direction_vector[1], 0, t)
+                self.moving_direction = [direction_vector[1], 0]
 
         if (self.moving_s and self.moving_w) or (self.moving_a and self.moving_d):
             energy_consumed = 0
@@ -314,7 +333,6 @@ class Ship(pygame.sprite.Sprite):
 
     def draw_ship(self):
         self.rect.center = (screen_width//2, screen_height//2)
-        self.rect.center = (screen_width//2, screen_height//2)
         rotated_ship = self.determine_direction()
         ship_rect = rotated_ship.get_rect(center=self.rect.center)
 
@@ -325,7 +343,7 @@ class Laser(pygame.sprite.Sprite):
     def __init__(self, x, y, direction: list, angle: int):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.rotate(image['laser'], angle)
-        self.rect = self.image.get_rect( )
+        self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.direction = direction
         self.speed = 10
@@ -357,7 +375,7 @@ class Station(pygame.sprite.Sprite):
         self.image = image['station']
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        self.range = pygame.Rect(0, 0, 500, 400) # HERE you can modify range of stations
+        self.range = pygame.Rect(0, 0, 500, 400)  # HERE you can modify range of stations
         self.name = name
         # energy buy price
         self.energy_price = round(random.uniform(0.5, 2), 2)
@@ -477,7 +495,6 @@ class Asteroid(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-
 
     def update(self):
         self.draw()
