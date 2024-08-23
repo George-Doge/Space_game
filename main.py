@@ -116,8 +116,8 @@ class Ship(pygame.sprite.Sprite):
         self.angle = 0
         self.moving_direction = []  # dir_vector
         # energy things and rectangles
-        self.energy_full = 10000
-        self.energy = 10000
+        self.energy_full = 100
+        self.energy = 100
         self.energy_max = pygame.Rect(70, 650, 100, 40)
         self.multiple_keys = False
         # initial credits
