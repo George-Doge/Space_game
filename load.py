@@ -18,7 +18,7 @@ def game_images():
         image['ship_2'] = pygame.transform.rotate(image['ship_2'], 270)
 
         image['station'] = pygame.image.load('images/sprites/station.png').convert_alpha()
-        # image['station'] = pygame.transform.scale(image['station'], (100, 100))
+        image['station'] = pygame.transform.scale(image['station'], (100, 100))
 
         image['asteroid'] = pygame.image.load('images/sprites/asteroid/asteroid.png').convert_alpha()
         image['asteroid'] = pygame.transform.scale(image['asteroid'], (64, 64))
