@@ -1,30 +1,26 @@
-# TODO: add imports
-# TODO: fix asteroid_group
+# Load packages
+import random
 
-class AsteroidSpawner():
+# Link objects
+from game_objects.asteroid import Asteroid
+
+
+class AsteroidSpawner:
     def __init__(self):
         self.spawnX = 500
         self.spawnY = 120
         self.spawn_width = 1020
         self.spawn_height = 600
+        self.rarity = "rare" if random.randint(1, 10) > 7 else "common"
+        self.randomy = None
+        self.randomx = None
 
     def spawn_location(self):
         # select random spawn point
         self.randomx = random.randint(self.spawnX, self.spawnX + self.spawn_width)
         self.randomy = random.randint(self.spawnY, self.spawnY + self.spawn_height)
 
-    def determine_type(self):
-        choice = random.randint(1, 10)
-
-        if choice > 7:
-            rarity = "rare"
-            return rarity
-
-        else:
-            rarity = "common"
-            return rarity
-
-    def update(self):
+    def update(self, asteroid_group):
         # pygame.draw.rect(screen, RED, (self.spawnX, self.spawnY, self.spawn_width, self.spawn_height), 5) # Debug to show asteroid spawn location
         spawn_new = False
         max_number_of_asteroids = 13  # HERE change to modify max number of asteroids
@@ -37,6 +33,5 @@ class AsteroidSpawner():
         if spawn_new:
             for i in range(number_of_asteroids, max_number_of_asteroids):
                 self.spawn_location()
-                rarity = self.determine_type()
-                asteroid = Asteroid(rarity, self.randomx, self.randomy)
+                asteroid = Asteroid(self.rarity, self.randomx, self.randomy)
                 asteroid_group.add(asteroid)

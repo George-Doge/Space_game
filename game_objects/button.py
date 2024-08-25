@@ -1,4 +1,6 @@
-# TODO: add imports
+# Load packages
+import pygame
+
 
 class Button:
     # button class

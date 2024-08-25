@@ -1,9 +1,15 @@
-# TODO: add imports
-# TODO: check merge-ability with Asteroid class
+# Load packages
+import pygame
+import random
+
+# Load graphics
+from load import asteroid_resources
+image = asteroid_resources()
+
 
 class Debris(pygame.sprite.Sprite):
     def __init__(self, rarity, x, y):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__()
         self.rarity = rarity
         if self.rarity == "rare":
             self.image = image['debris_rare']
@@ -14,17 +20,17 @@ class Debris(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
-    def update(self):
-        self.draw()
-        # check if the debris is collected by the player
-        if (self.rect.colliderect(Player.rect) and Player.storage < Player.storage_max):
+    def update(self, screen, ship):
+        self.draw(screen)
+        # check if the debris is collected by the ship
+        if self.rect.colliderect(ship.rect) and ship.storage < ship.storage_max:
             if self.rarity == "rare":
                 self.kill()
-                Player.storage += 1.5 * round(random.uniform(1, 3), 2)
+                ship.storage += 1.5 * round(random.uniform(1, 3), 2)
 
             elif self.rarity == "common":
                 self.kill()
-                Player.storage += 1.2 * round(random.uniform(0.6, 2), 2)
+                ship.storage += 1.2 * round(random.uniform(0.6, 2), 2)
 
-    def draw(self):
+    def draw(self, screen):
         screen.blit(self.image, self.rect)

@@ -1,5 +1,11 @@
-# TODO: add imports
-# TODO: fix asteroid_group and laser_group
+# Load packages
+import pygame
+import math
+
+# Load graphics
+from load import game_images
+image = game_images()
+
 
 class Laser(pygame.sprite.Sprite):
     def __init__(self, x, y, direction: list, angle: int):
@@ -10,8 +16,8 @@ class Laser(pygame.sprite.Sprite):
         self.direction = direction
         self.speed = 10
 
-    def update(self):
-        self.draw()
+    def update(self, screen, asteroid_group, laser_group):
+        self.draw(screen)
         screen_width = pygame.display.get_surface().get_size()[0]
 
         # move laser
@@ -27,6 +33,5 @@ class Laser(pygame.sprite.Sprite):
                 asteroid.health -= 15  # set damage
                 self.kill()
 
-    def draw(self):
+    def draw(self, screen):
         screen.blit(self.image, self.rect)
-
