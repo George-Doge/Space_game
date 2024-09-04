@@ -6,24 +6,24 @@ from game_objects.debris import Debris
 
 # Load graphics
 from load import asteroid_resources
-image = asteroid_resources()
 
 
 class Asteroid(pygame.sprite.Sprite):
     def __init__(self, rarity, x, y):
         super().__init__()
         self.type = rarity
+        self.asset = asteroid_resources()
         # determines what type of asteroid it should show and gives it properties
         if rarity == "common":
-            self.image = image['asteroid']
+            self.image = self.asset['asteroid']
             self.health = 30
 
         elif rarity == "rare":
-            self.image = image['asteroid_2']
+            self.image = self.asset['asteroid_2']
             self.health = 40
         # in case of error shows basic asteroid
         else:
-            self.image = image['asteroid']
+            self.image = self.asset['asteroid']
             self.type = "common"
 
         self.rect = self.image.get_rect()

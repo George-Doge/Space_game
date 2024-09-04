@@ -1,21 +1,17 @@
-# TODO: fix errors
-
 # Load packages
 import pygame
 import random
 import config
 
-from main import energy_buying, energy_all_buying, selling, selling_all, font_small, font_big
-
 # Load graphics
 from load import game_images
-image = game_images()
 
 
 class Station(pygame.sprite.Sprite):
     def __init__(self, name, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = image['station']
+        super().__init__()
+        self.asset = game_images()
+        self.image = self.asset['station']
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.range = pygame.Rect(0, 0, 500, 400)  # HERE you can modify range of stations
@@ -25,12 +21,13 @@ class Station(pygame.sprite.Sprite):
         # material sell price
         self.asteroid_price = round(random.uniform(1, 3), 2)
 
-    def update(self, screen, ship):
-        self.action(screen, ship)
+    def update(self, screen, ship, energy_buying, energy_all_buying, selling, selling_all):
+        self.action(screen, ship, energy_buying, energy_all_buying, selling, selling_all)
         self.draw(screen)
 
-    def energy_station(self, screen, ship):
-        config.draw_text(screen, f'Buy 10 energy for {self.energy_price} credits?', font_small, config.WHITE,
+    def energy_station(self, screen, ship, energy_buying, energy_all_buying):
+        config.draw_text(screen, f'Buy 10 energy for {self.energy_price} credits?',
+                         config.font_small, config.WHITE,
                          self.rect.x - 100,
                          self.rect.y + 100)
 
@@ -42,8 +39,9 @@ class Station(pygame.sprite.Sprite):
                 ship.credits -= self.energy_price
                 ship.energy += 10
 
-    def trade_station(self, screen, ship):
-        config.draw_text(screen, f'Sell mined asteroids for {self.asteroid_price} credits per t?', font_small, config.WHITE,
+    def trade_station(self, screen, ship, selling, selling_all):
+        config.draw_text(screen, f'Sell mined asteroids for {self.asteroid_price} credits per t?',
+                         config.font_small, config.WHITE,
                          self.rect.x - 100,
                          self.rect.y + 130)
 
@@ -56,23 +54,26 @@ class Station(pygame.sprite.Sprite):
             ship.storage = 0
 
     # interaction and actions of station are handled
-    def action(self, screen, ship):
+    def action(self, screen, ship, energy_buying, energy_all_buying, selling, selling_all):
         self.range.center = self.rect.center
 
         if self.range.colliderect(ship.rect):
-            config.draw_text(screen, f'{self.name} Station', font_small, config.WHITE, self.rect.x - len(self.name) * 3, self.rect.y - 30)
+            config.draw_text(screen, f'{self.name} Station',
+                             config.font_small, config.WHITE,
+                             self.rect.x - len(self.name) * 3,
+                             self.rect.y - 30)
 
             # check what type of station it is
 
             if self.name == 'Energy':
-                self.energy_station(screen, ship)
+                self.energy_station(screen, ship, energy_buying, energy_all_buying,)
 
             if self.name == 'Trade':
-                self.trade_station(screen, ship)
+                self.trade_station(screen, ship, selling, selling_all)
 
             if self.name == 'Energy & Trade':
-                self.energy_station(screen, ship)
-                self.trade_station(screen, ship)
+                self.energy_station(screen, ship, energy_buying, energy_all_buying)
+                self.trade_station(screen, ship, selling, selling_all)
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)

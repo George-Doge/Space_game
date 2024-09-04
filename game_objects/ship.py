@@ -11,12 +11,11 @@ from game_objects.laser import Laser
 from load import game_images
 from game_logic.render import move_objects
 
-image = game_images()
-
 
 class Ship(pygame.sprite.Sprite):
     def __init__(self, speed):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__()
+        self.asset = game_images()
         self.energy_stor = None
         self.flip = False
         self.max_speed = speed
@@ -41,9 +40,9 @@ class Ship(pygame.sprite.Sprite):
         # Render ship
         self.update_time = pygame.time.get_ticks()
         self.index = 0
-        self.image = image['ship_0']  # default ship frame (idle)
-        self.render_state0 = image['ship_0']  # idle frame
-        self.ship_animation_frames = [image['ship_1'], image['ship_2']]  # list of moving frames for the ship
+        self.image = self.asset['ship_0']  # default ship frame (idle)
+        self.render_state0 = self.asset['ship_0']  # idle frame
+        self.ship_animation_frames = [self.asset['ship_1'], self.asset['ship_2']]  # list of moving frames for the ship
 
         self.rect = self.image.get_rect()
         # this sets starting position
@@ -70,7 +69,7 @@ class Ship(pygame.sprite.Sprite):
             else:
                 self.speed = self.max_speed
         else:
-            self.image = image['ship_0']  # this resets ship's frame to idle if it is not moving
+            self.image = self.asset['ship_0']  # this resets ship's frame to idle if it is not moving
             if self.speed > 0:
                 self.speed -= self.max_speed * self.inertia_factor
                 t = self.speed / math.sqrt(self.moving_direction[0] ** 2 + self.moving_direction[1] ** 2)
@@ -140,12 +139,12 @@ class Ship(pygame.sprite.Sprite):
 
         pygame.draw.rect(screen, config.EMPTY_BLACK, (25 + bar_length, 50 + bar_width, 94, 36))
         pygame.draw.rect(screen, config.ENERGY_BLUE, energy_stor)
-        screen.blit(image['energy_bar'], (25, 50))
+        screen.blit(self.asset['energy_bar'], (25, 50))
 
         # inventory and money
         self.credits = round(self.credits, 2)
         config.draw_text(screen, 'COIN', config.font_small, config.WHITE, 300, 10)
-        screen.blit(image['coin'], (300, 50))
+        screen.blit(self.asset['coin'], (300, 50))
         config.draw_text(screen, f'{self.credits}', config.font_small, config.WHITE, 350, 55)
 
         if self.credits <= 0:
@@ -158,7 +157,7 @@ class Ship(pygame.sprite.Sprite):
 
         pygame.draw.rect(screen, config.EMPTY_BLACK, (500 + bar_length, 50 + bar_width, 94, 36))
         pygame.draw.rect(screen, config.STORAGE_BROWN, cargo_stored)
-        screen.blit(image['storage_bar'], (500, 50))
+        screen.blit(self.asset['storage_bar'], (500, 50))
 
         if self.storage >= self.storage_max * 0.75 and not self.storage == self.storage_max:
             config.draw_text(screen, f'Reaching maximum capacity', config.font_small, config.RED, 500, 105)

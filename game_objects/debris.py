@@ -4,18 +4,18 @@ import random
 
 # Load graphics
 from load import asteroid_resources
-image = asteroid_resources()
 
 
 class Debris(pygame.sprite.Sprite):
     def __init__(self, rarity, x, y):
         super().__init__()
         self.rarity = rarity
+        self.asset = asteroid_resources()
         if self.rarity == "rare":
-            self.image = image['debris_rare']
+            self.image = self.asset['debris_rare']
 
         else:
-            self.image = image['debris_common']
+            self.image = self.asset['debris_common']
 
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)

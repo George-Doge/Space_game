@@ -1,11 +1,11 @@
+import pygame
+
 import json
 import load
 import config
 
-import pygame
-
 # Link objects
-from game_objects.asteroid import Asteroid, load_asteroid_resources
+from game_objects.asteroid import Asteroid
 from game_objects.asteroidSpawner import AsteroidSpawner
 from game_objects.button import Button
 from game_objects.ship import Ship
@@ -122,7 +122,7 @@ while run:
         Player.update(screen, laser_group, map_objects, asteroidSpawnerInstance)
 
         asteroidSpawnerInstance.update(asteroid_group)
-        station_instance.update(screen, Player)
+        station_instance.update(screen, Player, energy_buying, energy_all_buying, selling, selling_all)
         asteroid_group.update(screen, debris_group)
         debris_group.update(screen, Player)
         laser_group.update(screen, asteroid_group, laser_group)
