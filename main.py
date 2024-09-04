@@ -1,8 +1,5 @@
 import json
 import load
-import config
-
-import pygame
 
 # Link objects
 from game_objects.asteroid import Asteroid
@@ -10,6 +7,8 @@ from game_objects.asteroidSpawner import AsteroidSpawner
 from game_objects.button import Button
 from game_objects.ship import Ship
 from game_objects.station import Station
+
+import pygame
 
 from menu import main_menu
 
@@ -20,10 +19,12 @@ from menu import main_menu
 
 pygame.init()
 
-screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.RESIZABLE)
+SCREEN_WIDTH = 1080
+SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
+
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
 
 pygame.display.set_caption("Space game v0.2.5")
-
 
 # Load images
 image = load.game_images()
@@ -32,6 +33,17 @@ image = load.game_images()
 clock = pygame.time.Clock()
 FPS = 60
 
+# COLOURS and fonts
+YELLOW = (211, 174, 54)
+WHITE = (255, 255, 255)
+ORANGE = (255, 165, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+DARK_BLUE = (0, 48, 78)
+DARK_BLUE_2 = (0, 3, 66)
+ENERGY_BLUE = (33, 150, 243)
+EMPTY_BLACK = (26, 24, 26)
+STORAGE_BROWN = (187, 142, 81)
 font_small = pygame.font.SysFont('Futura', 30)
 font_big = pygame.font.SysFont('Futura', 80)
 
@@ -64,8 +76,13 @@ def loading():
         print("!!!SAVE NOT FOUND!!!")
 
 
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
+
+
 def draw_background():
-    screen.fill(config.DARK_BLUE)
+    screen.fill(DARK_BLUE)
 
     if main_menu_instance.menu_state == 0:
         screen.blit(image['background'], (0, 0))
@@ -75,21 +92,21 @@ def move_objects(movement_x, movement_y, t):
     """move objects when the player is moving"""
 
     for asteroid in asteroid_group:
-        asteroid.rect.center = (asteroid.rect.centerx + t * movement_x,
-                                asteroid.rect.centery + t * movement_y)
+        asteroid.rect.center = (asteroid.rect.centerx + t*movement_x,
+                                asteroid.rect.centery + t*movement_y)
 
     for debris in debris_group:
-        debris.rect.center = (debris.rect.centerx + t * movement_x,
-                              debris.rect.centery + t * movement_y)
+        debris.rect.center = (debris.rect.centerx + t*movement_x,
+                              debris.rect.centery + t*movement_y)
 
     for laser in laser_group:
-        laser.rect.center = (laser.rect.centerx + t * movement_x,
-                             laser.rect.centery + t * movement_y)
+        laser.rect.center = (laser.rect.centerx + t*movement_x,
+                             laser.rect.centery + t*movement_y)
 
-    station_instance.rect.center = (station_instance.rect.centerx + t * movement_x,
-                                    station_instance.rect.centery + t * movement_y)
+    station_instance.rect.center = (station_instance.rect.centerx + t*movement_x,
+                                    station_instance.rect.centery + t*movement_y)
 
-    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + t * movement_x, asteroidSpawnerInstance.spawnY + t * movement_y
+    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + t*movement_x, asteroidSpawnerInstance.spawnY + t*movement_y
 
 
 def get_screen_size():
@@ -98,19 +115,17 @@ def get_screen_size():
 
 
 screen_width, screen_height = pygame.display.get_surface().get_size()
-
-# Create empty object groups
-asteroid_group = pygame.sprite.Group()
-debris_group = pygame.sprite.Group()
-laser_group = pygame.sprite.Group()
-
-# Create objects
+# declare instances
 Player = Ship(10)
 station_instance = Station('Energy & Trade', 300, 415)
+# asteroid things
 asteroidSpawnerInstance = AsteroidSpawner()
-asteroid = Asteroid("common", 487, 354)
-
-asteroid.add(asteroid_group)
+asteroid = Asteroid(screen, "common", 487, 354)
+asteroid_group = pygame.sprite.Group(asteroid)
+# debris things
+debris_group = pygame.sprite.Group()
+# laser things
+laser_group = pygame.sprite.Group()
 
 # buttons
 buyButton = Button(105, 760, image['buy_button'], 1)
@@ -132,7 +147,6 @@ while run:
     # updates instances of player and stations and more
     if main_menu_instance.menu_state == 0:  # loads things only when game is not paused
 
-        # TODO: redo button click check
         buyButton.update_pos(105, get_screen_size()[1] - 104)
         energy_buying = buyButton.draw(screen)
         buyMaxButton.update_pos(225, get_screen_size()[1] - 104)
@@ -142,14 +156,14 @@ while run:
         sellMaxButton.update_pos(670, get_screen_size()[1] - 104)
         selling_all = sellMaxButton.draw(screen)
 
-        Player.update(screen, laser_group)
+        Player.update()
 
-        asteroidSpawnerInstance.update(asteroid_group)
-        station_instance.update(screen, Player)
-        asteroid_group.update(screen, debris_group)
+        asteroidSpawnerInstance.update()
+        station_instance.update()
+        asteroid_group.update()
         for debris in debris_group:
-            debris.update(screen, Player)
-        laser_group.update(screen, asteroid_group, laser_group)
+            debris.update()
+        laser_group.update()
 
     if main_menu_instance.menu_state == 1:
         main_menu_instance.main_scene()

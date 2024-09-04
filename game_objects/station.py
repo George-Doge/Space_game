@@ -1,17 +1,5 @@
 # TODO: fix errors
 
-# Load packages
-import pygame
-import random
-import config
-
-from main import energy_buying, energy_all_buying, selling, selling_all, font_small, font_big
-
-# Load graphics
-from load import game_images
-image = game_images()
-
-
 class Station(pygame.sprite.Sprite):
     def __init__(self, name, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -25,55 +13,54 @@ class Station(pygame.sprite.Sprite):
         # material sell price
         self.asteroid_price = round(random.uniform(1, 3), 2)
 
-    def update(self, screen, ship):
-        self.action(screen, ship)
-        self.draw(screen)
+    def update(self):
+        self.action()
+        self.draw()
 
-    def energy_station(self, screen, ship):
-        config.draw_text(screen, f'Buy 10 energy for {self.energy_price} credits?', font_small, config.WHITE,
-                         self.rect.x - 100,
-                         self.rect.y + 100)
+    def energy_station(self):
+        draw_text(f'Buy 10 energy for {self.energy_price} credits?', font_small, WHITE, self.rect.x - 100,
+                  self.rect.y + 100)
 
-        if energy_buying and ship.credits > 0 and not ship.energy >= ship.energy_full:
-            ship.credits -= self.energy_price
-            ship.energy += 10
+        if energy_buying and Player.credits > 0 and not Player.energy >= Player.energy_full:
+            Player.credits -= self.energy_price
+            Player.energy += 10
         if energy_all_buying:
-            while not ship.energy >= ship.energy_full and ship.credits > 0:
-                ship.credits -= self.energy_price
-                ship.energy += 10
+            while not Player.energy >= Player.energy_full and Player.credits > 0:
+                Player.credits -= self.energy_price
+                Player.energy += 10
 
-    def trade_station(self, screen, ship):
-        config.draw_text(screen, f'Sell mined asteroids for {self.asteroid_price} credits per t?', font_small, config.WHITE,
-                         self.rect.x - 100,
-                         self.rect.y + 130)
+    def trade_station(self):
+        draw_text(f'Sell mined asteroids for {self.asteroid_price} credits per t?', font_small, WHITE,
+                  self.rect.x - 100,
+                  self.rect.y + 130)
 
         # selling
-        if selling and ship.storage > 0:
-            ship.storage -= 1
-            ship.credits += self.asteroid_price
-        if selling_all and ship.storage > 0:
-            ship.credits += self.asteroid_price + ship.storage
-            ship.storage = 0
+        if selling and Player.storage > 0:
+            Player.storage -= 1
+            Player.credits += self.asteroid_price
+        if selling_all and Player.storage > 0:
+            Player.credits += self.asteroid_price + Player.storage
+            Player.storage = 0
 
     # interaction and actions of station are handled
-    def action(self, screen, ship):
+    def action(self):
         self.range.center = self.rect.center
 
-        if self.range.colliderect(ship.rect):
-            config.draw_text(screen, f'{self.name} Station', font_small, config.WHITE, self.rect.x - len(self.name) * 3, self.rect.y - 30)
+        if self.range.colliderect(Player.rect):
+            draw_text(f'{self.name} Station', font_small, WHITE, self.rect.x - len(self.name) * 3, self.rect.y - 30)
 
             # check what type of station it is
 
             if self.name == 'Energy':
-                self.energy_station(screen, ship)
+                self.energy_station()
 
             if self.name == 'Trade':
-                self.trade_station(screen, ship)
+                self.trade_station()
 
             if self.name == 'Energy & Trade':
-                self.energy_station(screen, ship)
-                self.trade_station(screen, ship)
+                self.energy_station()
+                self.trade_station()
 
-    def draw(self, screen):
+    def draw(self):
         screen.blit(self.image, self.rect)
         # pygame.draw.rect(screen, RED, self.range, 3) debug line for station range
