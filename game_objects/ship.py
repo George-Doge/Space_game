@@ -6,10 +6,11 @@ from fractions import Fraction
 
 # Link objects
 from game_objects.laser import Laser
-from main import move_objects, font_small
 
 # Load graphics
 from load import game_images
+from game_logic.render import move_objects
+
 image = game_images()
 
 
@@ -55,9 +56,9 @@ class Ship(pygame.sprite.Sprite):
         self.moving_d = False
         self.shooting = False
 
-    def update(self, screen, laser_group):
+    def update(self, screen, laser_group, map_objects, asteroid_spawner):
         self.action(screen, laser_group)
-        self.moving()
+        self.moving(map_objects, asteroid_spawner)
 
         # print(f'Current speed: {self.speed}\n\n')
 
@@ -73,13 +74,13 @@ class Ship(pygame.sprite.Sprite):
             if self.speed > 0:
                 self.speed -= self.max_speed * self.inertia_factor
                 t = self.speed / math.sqrt(self.moving_direction[0] ** 2 + self.moving_direction[1] ** 2)
-                move_objects(*self.moving_direction, t)
+                move_objects(map_objects, asteroid_spawner, *self.moving_direction, t)
             else:
                 self.speed = 0
 
         self.draw_ship(screen)
 
-    def moving(self):
+    def moving(self, map_objects, asteroid_spawner):
 
         energy_consumed = 0
         self.energy = round(self.energy, 2)
@@ -92,22 +93,22 @@ class Ship(pygame.sprite.Sprite):
 
             if self.moving_w:
                 energy_consumed -= 1
-                move_objects(-direction_vector[0], -direction_vector[1], t)
+                move_objects(map_objects, asteroid_spawner, -direction_vector[0], -direction_vector[1], t)
                 self.moving_direction = [-direction_vector[0], -direction_vector[1]]
 
             if self.moving_s:
                 energy_consumed -= 1
-                move_objects(direction_vector[0], direction_vector[1], t)
+                move_objects(map_objects, asteroid_spawner, direction_vector[0], direction_vector[1], t)
                 self.moving_direction = [direction_vector[0], direction_vector[1]]
 
             if self.moving_a:
                 energy_consumed -= 1
-                move_objects(-direction_vector[1], 0, t)
+                move_objects(map_objects, asteroid_spawner, -direction_vector[1], 0, t)
                 self.moving_direction = [-direction_vector[0], 0]
 
             if self.moving_d:
                 energy_consumed -= 1
-                move_objects(direction_vector[1], 0, t)
+                move_objects(map_objects, asteroid_spawner, direction_vector[1], 0, t)
                 self.moving_direction = [direction_vector[1], 0]
 
         if (self.moving_s and self.moving_w) or (self.moving_a and self.moving_d):
@@ -124,16 +125,16 @@ class Ship(pygame.sprite.Sprite):
     def action(self, screen, laser_group):
         # check for low or max energy
         if self.energy <= self.energy_full * 0.3 and not self.energy <= 0:
-            config.draw_text(screen, 'WARNING, LOW ENERGY', font_small, config.RED, 25, 105)
+            config.draw_text(screen, 'WARNING, LOW ENERGY', config.font_small, config.RED, 25, 105)
 
         elif self.energy <= 0:
-            config.draw_text(screen, 'NO ENERGY', font_small, config.RED, 25, 105)
+            config.draw_text(screen, 'NO ENERGY', config.font_small, config.RED, 25, 105)
 
         if self.energy > self.energy_full:
             self.energy = self.energy_full
 
         # draw ENERGY gauge
-        config.draw_text(screen, 'ENERGY', font_small, config.WHITE, 70, 10)
+        config.draw_text(screen, 'ENERGY', config.font_small, config.WHITE, 70, 10)
         bar_length, bar_width = 48, 7
         energy_stor = pygame.Rect(25 + bar_length, 50 + bar_width, int(94 * (self.energy / 100)), 36)
 
@@ -143,16 +144,16 @@ class Ship(pygame.sprite.Sprite):
 
         # inventory and money
         self.credits = round(self.credits, 2)
-        config.draw_text(screen, 'COIN', font_small, config.WHITE, 300, 10)
+        config.draw_text(screen, 'COIN', config.font_small, config.WHITE, 300, 10)
         screen.blit(image['coin'], (300, 50))
-        config.draw_text(screen, f'{self.credits}', font_small, config.WHITE, 350, 55)
+        config.draw_text(screen, f'{self.credits}', config.font_small, config.WHITE, 350, 55)
 
         if self.credits <= 0:
             self.credits = 0
 
         # cargo
         self.storage = round(self.storage, 2)
-        config.draw_text(screen, 'CARGO', font_small, config.WHITE, 545, 10)
+        config.draw_text(screen, 'CARGO', config.font_small, config.WHITE, 545, 10)
         cargo_stored = pygame.Rect(500 + bar_length, 50 + bar_width, int(94 * (self.storage / 15)), 36)
 
         pygame.draw.rect(screen, config.EMPTY_BLACK, (500 + bar_length, 50 + bar_width, 94, 36))
@@ -160,10 +161,10 @@ class Ship(pygame.sprite.Sprite):
         screen.blit(image['storage_bar'], (500, 50))
 
         if self.storage >= self.storage_max * 0.75 and not self.storage == self.storage_max:
-            config.draw_text(screen, f'Reaching maximum capacity', font_small, config.RED, 500, 105)
+            config.draw_text(screen, f'Reaching maximum capacity', config.font_small, config.RED, 500, 105)
 
         elif self.storage >= self.storage_max:
-            config.draw_text(screen, f'Maximum cargo capacity reached', font_small, config.RED, 500, 105)
+            config.draw_text(screen, f'Maximum cargo capacity reached', config.font_small, config.RED, 500, 105)
 
         if self.storage < 0:
             self.storage = 0

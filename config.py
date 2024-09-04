@@ -1,3 +1,5 @@
+import pygame.font
+
 SCREEN_WIDTH = 1080
 SCREEN_HEIGHT = int(SCREEN_WIDTH * 0.8)
 
@@ -13,8 +15,12 @@ ENERGY_BLUE = (33, 150, 243)
 EMPTY_BLACK = (26, 24, 26)
 STORAGE_BROWN = (187, 142, 81)
 
+pygame.font.init()
+
+font_small = pygame.font.SysFont('Futura', 30)
+font_big = pygame.font.SysFont('Futura', 80)
+
 
 def draw_text(screen, text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
-

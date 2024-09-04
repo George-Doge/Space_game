@@ -5,7 +5,7 @@ import config
 import pygame
 
 # Link objects
-from game_objects.asteroid import Asteroid
+from game_objects.asteroid import Asteroid, load_asteroid_resources
 from game_objects.asteroidSpawner import AsteroidSpawner
 from game_objects.button import Button
 from game_objects.ship import Ship
@@ -31,9 +31,6 @@ image = load.game_images()
 # set framerate
 clock = pygame.time.Clock()
 FPS = 60
-
-font_small = pygame.font.SysFont('Futura', 30)
-font_big = pygame.font.SysFont('Futura', 80)
 
 
 # Saving/loading functions
@@ -71,27 +68,6 @@ def draw_background():
         screen.blit(image['background'], (0, 0))
 
 
-def move_objects(movement_x, movement_y, t):
-    """move objects when the player is moving"""
-
-    for asteroid in asteroid_group:
-        asteroid.rect.center = (asteroid.rect.centerx + t * movement_x,
-                                asteroid.rect.centery + t * movement_y)
-
-    for debris in debris_group:
-        debris.rect.center = (debris.rect.centerx + t * movement_x,
-                              debris.rect.centery + t * movement_y)
-
-    for laser in laser_group:
-        laser.rect.center = (laser.rect.centerx + t * movement_x,
-                             laser.rect.centery + t * movement_y)
-
-    station_instance.rect.center = (station_instance.rect.centerx + t * movement_x,
-                                    station_instance.rect.centery + t * movement_y)
-
-    asteroidSpawnerInstance.spawnX, asteroidSpawnerInstance.spawnY = asteroidSpawnerInstance.spawnX + t * movement_x, asteroidSpawnerInstance.spawnY + t * movement_y
-
-
 def get_screen_size():
     screen_info = pygame.display.Info()
     return screen_info.current_w, screen_info.current_h
@@ -111,6 +87,8 @@ asteroidSpawnerInstance = AsteroidSpawner()
 asteroid = Asteroid("common", 487, 354)
 
 asteroid.add(asteroid_group)
+
+map_objects = [asteroid_group, debris_group, laser_group, station_instance]
 
 # buttons
 buyButton = Button(105, 760, image['buy_button'], 1)
@@ -132,7 +110,6 @@ while run:
     # updates instances of player and stations and more
     if main_menu_instance.menu_state == 0:  # loads things only when game is not paused
 
-        # TODO: redo button click check
         buyButton.update_pos(105, get_screen_size()[1] - 104)
         energy_buying = buyButton.draw(screen)
         buyMaxButton.update_pos(225, get_screen_size()[1] - 104)
@@ -142,13 +119,12 @@ while run:
         sellMaxButton.update_pos(670, get_screen_size()[1] - 104)
         selling_all = sellMaxButton.draw(screen)
 
-        Player.update(screen, laser_group)
+        Player.update(screen, laser_group, map_objects, asteroidSpawnerInstance)
 
         asteroidSpawnerInstance.update(asteroid_group)
         station_instance.update(screen, Player)
         asteroid_group.update(screen, debris_group)
-        for debris in debris_group:
-            debris.update(screen, Player)
+        debris_group.update(screen, Player)
         laser_group.update(screen, asteroid_group, laser_group)
 
     if main_menu_instance.menu_state == 1:
