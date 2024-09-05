@@ -8,7 +8,7 @@ from game_logic.load import game_images
 
 class Laser(pygame.sprite.Sprite):
     def __init__(self, x, y, direction: list, angle: int):
-        pygame.sprite.Sprite.__init__(self)
+        super().__init__()
         self.asset = game_images()
         self.image = pygame.transform.rotate(self.asset['laser'], angle)
         self.rect = self.image.get_rect()
