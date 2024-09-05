@@ -20,8 +20,6 @@ class AsteroidSpawner:
 
     def spawn_location(self):
         # select random spawn point
-        print(self.spawnX, self.spawnX + self.spawn_width)
-        print(self.spawnY, self.spawnY + self.spawn_height)
         self.randomx = random.randint(round(self.spawnX), round(self.spawnX + self.spawn_width))
         self.randomy = random.randint(round(self.spawnY), round(self.spawnY + self.spawn_height))
 

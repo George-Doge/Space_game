@@ -19,13 +19,14 @@ class Laser(pygame.sprite.Sprite):
     def update(self, screen, asteroid_group, laser_group):
         self.draw(screen)
         screen_width = pygame.display.get_surface().get_size()[0]
+        screen_height = pygame.display.get_surface().get_size()[1]
 
         # move laser
         t = self.speed / math.sqrt(self.direction[0] ** 2 + self.direction[1] ** 2)
         self.rect.centerx += t * self.direction[0]
         self.rect.centery += t * self.direction[1]
 
-        if self.rect.left >= screen_width or self.rect.right < 0:
+        if (self.rect.left >= screen_width or self.rect.right < 0) or (self.rect.bottom <= 0 or self.rect.top >= screen_height):
             self.kill()
         # check for collision with asteroid
         for asteroid in asteroid_group:

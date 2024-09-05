@@ -59,10 +59,9 @@ class Ship(pygame.sprite.Sprite):
         self.action(screen, laser_group)
         self.moving(map_objects, asteroid_spawner)
 
-        # print(f'Current speed: {self.speed}\n\n')
+        # print(f'Current speed: {self.speed}')
 
-        if (
-                self.moving_s or self.moving_w or self.moving_a or self.moving_d) and self.energy > 0 and not self.multiple_keys:
+        if (self.moving_s or self.moving_w or self.moving_a or self.moving_d) and self.energy > 0 and not self.multiple_keys:
             self.render_ship_animation()  # this runs ship animation logic
             if self.speed < self.max_speed:
                 self.speed += self.max_speed * self.inertia_factor
@@ -72,7 +71,7 @@ class Ship(pygame.sprite.Sprite):
             self.image = self.asset['ship_0']  # this resets ship's frame to idle if it is not moving
             if self.speed > 0:
                 self.speed -= self.max_speed * self.inertia_factor
-                t = self.speed / math.sqrt(self.moving_direction[0] ** 2 + self.moving_direction[1] ** 2)
+                t = self.speed / math.sqrt(self.moving_direction[0] ** 2 + self.moving_direction[1] ** 2)                
                 move_objects(map_objects, asteroid_spawner, *self.moving_direction, t)
             else:
                 self.speed = 0
@@ -103,7 +102,7 @@ class Ship(pygame.sprite.Sprite):
             if self.moving_a:
                 energy_consumed -= 1
                 move_objects(map_objects, asteroid_spawner, -direction_vector[1], 0, t)
-                self.moving_direction = [-direction_vector[0], 0]
+                self.moving_direction = [-direction_vector[1], 0]
 
             if self.moving_d:
                 energy_consumed -= 1
