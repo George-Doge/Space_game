@@ -14,11 +14,15 @@ DARK_BLUE_2 = (0, 3, 66)
 ENERGY_BLUE = (33, 150, 243)
 EMPTY_BLACK = (26, 24, 26)
 STORAGE_BROWN = (187, 142, 81)
+BLACK = (0, 0, 0)
+GREY = (105, 105, 105)
+
 
 pygame.font.init()
 
 font_small = pygame.font.SysFont('Futura', 30)
 font_big = pygame.font.SysFont('Futura', 80)
+font_smaller = pygame.font.SysFont('Futura', 10)
 
 
 def draw_text(screen, text, font, text_col, x, y):

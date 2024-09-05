@@ -3,7 +3,7 @@ import pygame
 import math
 
 # Load graphics
-from load import game_images
+from game_logic.load import game_images
 
 
 class Laser(pygame.sprite.Sprite):

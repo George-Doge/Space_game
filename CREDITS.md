@@ -1,5 +1,8 @@
 # ACKNOWLEDGMENTS
 
+## CODING
+- I want to thank [Tislom58](https://github.com/Tislom58/) for all the code he made :D
+
 ## SPRITES
 
 - Space Station and ship animation by [Tislom58](https://github.com/Tislom58/)

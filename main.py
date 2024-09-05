@@ -1,7 +1,7 @@
 import pygame
 
 import json
-import load
+import game_logic.load as load
 import config
 
 # Link objects
@@ -10,8 +10,7 @@ from game_objects.asteroidSpawner import AsteroidSpawner
 from game_objects.button import Button
 from game_objects.ship import Ship
 from game_objects.station import Station
-
-from menu import main_menu
+from game_objects.menu import main_menu
 
 # TODO: More stations
 # TODO: bigger/more maps??

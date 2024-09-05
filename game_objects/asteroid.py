@@ -5,7 +5,7 @@ import pygame
 from game_objects.debris import Debris
 
 # Load graphics
-from load import asteroid_resources
+from game_logic.load import asteroid_resources
 
 
 class Asteroid(pygame.sprite.Sprite):

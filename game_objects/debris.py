@@ -3,7 +3,7 @@ import pygame
 import random
 
 # Load graphics
-from load import asteroid_resources
+from game_logic.load import asteroid_resources
 
 
 class Debris(pygame.sprite.Sprite):

@@ -34,3 +34,6 @@ class Button:
 
     def update_pos(self, new_x: int, new_y: int):
         self.rect.center = (new_x, new_y)
+
+    def resize_coords(self, x, y):
+        self.rect.x, self.rect.y = x, y

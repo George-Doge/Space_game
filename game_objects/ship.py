@@ -8,7 +8,7 @@ from fractions import Fraction
 from game_objects.laser import Laser
 
 # Load graphics
-from load import game_images
+from game_logic.load import game_images
 from game_logic.render import move_objects
 
 
