@@ -99,6 +99,7 @@ sellMaxButton = Button(670, 760, image['max_button'], 1)
 # main menu instance
 main_menu_instance = main_menu()
 run = True
+debug = False
 
 while run:
 
@@ -126,6 +127,9 @@ while run:
         asteroid_group.update(screen, debris_group)
         debris_group.update(screen, Player)
         laser_group.update(screen, asteroid_group, laser_group)
+
+        if debug:
+            Player.energy = 100
 
     if main_menu_instance.menu_state == 1:
         main_menu_instance.main_scene()
@@ -165,6 +169,10 @@ while run:
 
             if event.key == pygame.K_SPACE:
                 Player.shooting = True
+
+            if event.key == pygame.K_p:
+                debug = not debug
+                print(f"DEBUG:{debug}")
 
             # saving and loading
             if event.key == pygame.K_F5 and main_menu_instance.menu_state == 0:
