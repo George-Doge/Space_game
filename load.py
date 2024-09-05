@@ -7,6 +7,7 @@ def game_images():
     image: dict = {}
     try:
         image['background'] = pygame.image.load('images/background/space3.jpeg').convert_alpha()
+
         image['ship_0'] = pygame.image.load('images/sprites/ship/ship-state0.png').convert_alpha()
         image['ship_0'] = pygame.transform.rotate(image['ship_0'], 270)
 
@@ -18,16 +19,6 @@ def game_images():
 
         image['station'] = pygame.image.load('images/sprites/station.png').convert_alpha()
         image['station'] = pygame.transform.scale(image['station'], (100, 100))
-
-        image['asteroid'] = pygame.image.load('images/sprites/asteroid/asteroid.png').convert_alpha()
-        image['asteroid'] = pygame.transform.scale(image['asteroid'], (64, 64))
-
-        image['debris_common'] = pygame.image.load('images/sprites/asteroid/debris.png').convert_alpha()
-
-        image['asteroid_2'] = pygame.image.load('images/sprites/asteroid/asteroid-2.png').convert_alpha()
-        image['asteroid_2'] = pygame.transform.scale(image['asteroid_2'], (64, 64))
-
-        image['debris_rare'] = pygame.image.load('images/sprites/asteroid/debris_rare.png').convert_alpha()
 
         image['laser'] = pygame.image.load('images/sprites/laser.png').convert_alpha()
 
@@ -45,6 +36,33 @@ def game_images():
 
     except FileNotFoundError as message:
         print("An error occurred while loading images in load.py. One or more of them have not been "
+              "found.\nDownload them again or check if they are in an images folder.")
+        print(f"Error message:\n{message}")
+
+        with open("errorLog.txt", "w") as file:
+            file.write(str(message))
+
+        exit(1)
+
+
+def asteroid_resources():
+    """ Loads asteroid resources into a dictionary and returns it """
+    image: dict = {}
+    try:
+        image['asteroid'] = pygame.image.load('images/sprites/asteroid/asteroid.png').convert_alpha()
+        image['asteroid'] = pygame.transform.scale(image['asteroid'], (64, 64))
+
+        image['debris_common'] = pygame.image.load('images/sprites/asteroid/debris.png').convert_alpha()
+
+        image['asteroid_2'] = pygame.image.load('images/sprites/asteroid/asteroid-2.png').convert_alpha()
+        image['asteroid_2'] = pygame.transform.scale(image['asteroid_2'], (64, 64))
+
+        image['debris_rare'] = pygame.image.load('images/sprites/asteroid/debris_rare.png').convert_alpha()
+
+        return image
+
+    except FileNotFoundError as message:
+        print("An error occurred while loading ASTEROID images in load.py. One or more of them have not been "
               "found.\nDownload them again or check if they are in an images folder.")
         print(f"Error message:\n{message}")
 
