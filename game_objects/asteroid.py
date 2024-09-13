@@ -28,9 +28,11 @@ class Asteroid(pygame.sprite.Sprite):
 
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+        self.is_rendered = True
 
     def update(self, screen, group):
         self.draw(screen)
+        self.is_on_screen()
 
         if self.health <= 0:
 
@@ -46,3 +48,9 @@ class Asteroid(pygame.sprite.Sprite):
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
+
+    def is_on_screen(self):
+        screen_info = pygame.display.Info()
+        if self.rect.centerx > screen_info.current_w or self.rect.centerx < 0 \
+                or self.rect.centery > screen_info.current_h or self.rect.centery < 0:
+            self.is_rendered = False
