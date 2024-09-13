@@ -7,6 +7,10 @@ Check [CREDITS.md](CREDITS.md) for sources. The code in the development branch i
 
 Running this game in the default window size (1080x864) or in fullscreen is recommended!
 
+## Port of this game
+
+This little project will be ported to (and hopefully improved) in the Godot Game Engine. You can see it in this [repo](https://github.com/George-Doge/Space_game_godot).
+
 ---
 >[!IMPORTANT]
 > When running `main` (or any executable) you must have the `images` in the same directory!
@@ -18,7 +22,7 @@ Running this game in the default window size (1080x864) or in fullscreen is reco
 - [x] SAVE & LOAD
 - [X] MORE ASTEROID TYPES
 - [X] START/PAUSE MENU
-- [ ] CLEAN UP THE CODE
+- [X] CLEAN UP THE CODE
 - [ ] ADDITIONAL THINGS??
 
 
@@ -28,3 +32,4 @@ Running this game in the default window size (1080x864) or in fullscreen is reco
 - Player can move freely around the map (for now there is only cold space around the station)
 - Added Player rotation
 - Updated controls and movement
+- Updated Asteroid Spawning system
