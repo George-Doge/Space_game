@@ -19,10 +19,10 @@ from game_objects.menu import main_menu
 
 pygame.init()
 
-screen = pygame.display.set_mode((config.SCREEN_WIDTH, config.SCREEN_HEIGHT), pygame.RESIZABLE)
+display_info = pygame.display.Info()
+screen = pygame.display.set_mode((display_info.current_w, display_info.current_h), pygame.FULLSCREEN)
 
 pygame.display.set_caption("Space game v0.2.5")
-
 
 # Load images
 image = load.game_images()
@@ -148,6 +148,14 @@ while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_presses = pygame.mouse.get_pressed()
+            if mouse_presses[0]:
+                Player.shooting = True
+
+        if event.type == pygame.MOUSEBUTTONUP:
+            Player.shooting = False
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
